@@ -37,7 +37,7 @@ groups = {
 
 input_extensions = [".yml"]
 extensions_not_containing_graphviz_output = [".gv", ".bom.tsv"]
-extensions_containing_graphviz_output = [".png", ".svg", ".html"]
+extensions_containing_graphviz_output = [".png", ".svg", ".html", ".pdf"]
 generated_extensions = (
     extensions_not_containing_graphviz_output + extensions_containing_graphviz_output
 )
@@ -65,7 +65,7 @@ def build_generated(groupkeys):
         # collect and iterate input YAML files
         for yaml_file in collect_filenames("Building", key, input_extensions):
             try:
-                res = cli(["--formats", "ghpst", str(yaml_file)])
+                res = cli(["--formats", "ghpstPb", str(yaml_file)])
             except BaseException as e:
                 if str(e) != "0" and not isinstance(
                     e, (click.ClickException, SystemExit)
