@@ -7,3 +7,4 @@ setuptools
 tabulate
 jinja2
 weasyprint
+xlsxwriter
