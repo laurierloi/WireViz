@@ -76,12 +76,13 @@ def image_and_caption_cells(component: Component) -> (Td, Td):
 
 def gv_node_connector(connector: Connector) -> Table:
     # TODO: extend connector style support
+    params = { 'component': connector }
     is_simple_connector = connector.style == 'simple'
     template_name = "connector.html"
     if is_simple_connector:
         template_name = "simple-connector.html"
 
-    rendered = get_template(template_name).render({'component': connector})
+    rendered = get_template(template_name).render(params)
     cleaned_render = '\n'.join([l.rstrip() for l in rendered.split('\n') if l.strip()])
     return cleaned_render
 
@@ -105,9 +106,6 @@ def gv_node_cable(cable: Cable) -> Table:
 
 def gv_node_component(component: Component) -> Table:
     # If no wires connected (except maybe loop wires)?
-    if isinstance(component, Connector):
-        if not (component.ports_left or component.ports_right):
-            component.ports_left = True  # Use left side pins by default
 
     # generate all rows to be shown in the node
     if component.show_name:
@@ -119,12 +117,7 @@ def gv_node_component(component: Component) -> Table:
     line_pn = component.partnumbers.as_list()
 
     if isinstance(component, Connector):
-        line_info = [
-            html_line_breaks(component.type),
-            html_line_breaks(component.subtype),
-            f"{component.pincount}-pin" if component.show_pincount else None,
-            str(component.color) if component.color else None,
-        ]
+        raise RuntimeError()
     elif isinstance(component, Cable):
         line_info = [
             html_line_breaks(component.type),
@@ -142,13 +135,7 @@ def gv_node_component(component: Component) -> Table:
     line_additional_component_table = gv_additional_component_table(component)
     line_notes = [html_line_breaks(component.notes)]
 
-    if isinstance(component, Connector):
-        if component.style != "simple":
-            line_ports = gv_pin_table(component)
-        else:
-            line_ports = None
-    elif isinstance(component, Cable):
-        line_ports = gv_conductor_table(component)
+    line_ports = gv_conductor_table(component)
 
     lines = [
         line_name,
@@ -162,14 +149,6 @@ def gv_node_component(component: Component) -> Table:
     ]
 
     tbl = nested_table(lines)
-    if is_simple_connector:
-        # Simple connectors have no pin table, and therefore, no ports to attach wires to.
-        # Manually assign left and right ports here if required.
-        # Use table itself for right port, and the first cell for left port.
-        # Even if the table only has one cell, two separate ports can still be assigned.
-        tbl.update_attribs(port="p1r")
-        first_cell_in_tbl = tbl.contents[0].contents
-        first_cell_in_tbl.update_attribs(port="p1l")
 
     return tbl
 
