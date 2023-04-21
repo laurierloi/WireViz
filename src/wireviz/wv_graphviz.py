@@ -19,7 +19,165 @@ from wireviz.wv_dataclasses import (
 )
 from wireviz.wv_html import Img, Table, Td, Tr
 from wireviz.wv_utils import html_line_breaks, remove_links
+from wireviz.wv_templates import get_template
 
+
+def gv_pin_table(component) -> Table:
+    pin_rows = []
+    for pin in component.pin_objects.values():
+        if component.should_show_pin(pin.id):
+            pin_rows.append(gv_pin_row(pin, component))
+    if len(pin_rows) == 0:
+        # TODO: write test for empty pin tables, and for unconnected connectors that hide disconnected pins
+        pass
+    tbl = Table(pin_rows, border=0, cellborder=1, cellpadding=3, cellspacing=0)
+    return tbl
+
+
+def gv_pin_row(pin, connector) -> Tr:
+    # ports in GraphViz are 1-indexed for more natural maping to pin/wire numbers
+    has_pincolors = any([_pin.color for _pin in connector.pin_objects.values()])
+    cells = [
+        Td(pin.id, port=f"p{pin.index+1}l") if connector.ports_left else None,
+        Td(pin.label, delete_if_empty=True),
+        Td(str(pin.color) if pin.color else "", sides="TBL") if has_pincolors else None,
+        Td(color_minitable(pin.color), sides="TBR") if has_pincolors else None,
+        Td(pin.id, port=f"p{pin.index+1}r") if connector.ports_right else None,
+    ]
+    return Tr(cells)
+
+def image_and_caption_cells(component: Component) -> (Td, Td):
+    if not component.image:
+        return (None, None)
+
+    image_tag = Img(scale=component.image.scale, src=component.image.src)
+    image_cell_inner = Td(image_tag, flat=True)
+    if component.image.fixedsize:
+        # further nest the image in a table with width/height/fixedsize parameters,
+        # and place that table in a cell
+        image_cell = Td(
+            Table(Tr(image_cell_inner), border=0, cellborder=0, cellspacing=0, id="!")
+        )
+    else:
+        image_cell = image_cell_inner
+
+    image_cell.update_attribs(
+        balign="left",
+        bgcolor=component.image.bgcolor.html,
+        sides="TLR" if component.image.caption else None,
+    )
+
+    if component.image.caption:
+        caption_cell = Td(
+            f"{html_line_breaks(component.image.caption)}", balign="left", sides="BLR"
+        )
+    else:
+        caption_cell = None
+    return (image_cell, caption_cell)
+
+def gv_node_connector(connector: Connector) -> Table:
+    pins = []
+    use_left = bool(connector.ports_left)
+    use_right = bool(connector.ports_right)
+    has_pincolors = any([_pin.color for _pin in connector.pin_objects.values()])
+    for pin in connector.pin_objects.values():
+        if not connector.should_show_pin(pin.id):
+            continue
+        color = str(pin.color) if pin.color else "" if has_pincolors else None
+        pins.append({
+            'id': pin.id,
+            'index': pin.index,
+            'label': pin.label,
+            'color': color,
+            'color_len': len(pin.color),
+            'has_pincolors': has_pincolors,
+        })
+    columns = 2 + (1 if use_left else 0) + (1 if use_right else 0)
+    # TODO: group per line/item
+    params = {
+        'designator': f"{remove_links(connector.designator)}",
+        'use_left': use_left,
+        'use_right': use_right,
+        'line_pn': partnumbers2list(connector.partnumbers),
+        'pins': pins,
+        'columns': columns,
+        'bom_id': connector.bom_entry.id,
+        # TODO: support asdict(connector)
+        'type': html_line_breaks(connector.type),
+        'subtype': html_line_breaks(connector.subtype),
+        'pincount': connector.pincount,
+        'show_pincount': connector.show_pincount,
+        'color': connector.color,
+        'color_len': len(connector.color),
+        'image': connector.image,
+        'line_notes': html_line_breaks(connector.notes),
+        'additional_components': connector.additional_components,
+    }
+    # TODO: extend connector style support
+    is_simple_connector = connector.style == 'simple'
+    template_name = "connector.html"
+    if is_simple_connector:
+        template_name = "simple-connector.html"
+
+    rendered = get_template(template_name).render(params)
+    cleaned_render = '\n'.join([l.rstrip() for l in rendered.split('\n') if l.strip()])
+    return cleaned_render
+    ## If no wires connected (except maybe loop wires)?
+    #if isinstance(connector, Connector):
+    #    if not (connector.ports_left or connector.ports_right):
+    #        connector.ports_left = True  # Use left side pins by default
+
+    ## generate all rows to be shown in the node
+    #if connector.show_name:
+    #    str_name = f"{remove_links(connector.designator)}"
+    #    line_name = Td(str_name, bgcolor=connector.bgcolor_title.html)
+    #else:
+    #    line_name = None
+
+    #line_pn = partnumbers2list(connector.partnumbers)
+
+    #is_simple_connector = connector.style == 'simple'
+    #line_info = [
+    #    html_line_breaks(connector.type),
+    #    html_line_breaks(connector.subtype),
+    #    f"{connector.pincount}-pin" if connector.show_pincount else None,
+    #    str(connector.color) if connector.color else None,
+    #]
+
+    #if connector.color:
+    #    line_info.extend(colorbar_cells(connector.color))
+
+    #line_image, line_image_caption = image_and_caption_cells(connector)
+    ##line_additional_connector_table = gv_additional_component_table(connector)
+    #line_notes = [html_line_breaks(connector.notes)]
+
+    #if connector.style != "simple":
+    #    line_ports = gv_pin_table(connector)
+    #else:
+    #    line_ports = None
+
+    #lines = [
+    #    line_name,
+    #    line_pn,
+    #    line_info,
+    #    line_ports,
+    #    line_image,
+    #    line_image_caption,
+    #    line_additional_connector_table,
+    #    line_notes,
+    #]
+
+    #tbl = nested_table(lines)
+    #if is_simple_connector:
+    #    # Simple connectors have no pin table, and therefore, no ports to attach wires to.
+    #    # Manually assign left and right ports here if required.
+    #    # Use table itself for right port, and the first cell for left port.
+    #    # Even if the table only has one cell, two separate ports can still be assigned.
+    #    tbl.update_attribs(port="p1r")
+    #    first_cell_in_tbl = tbl.contents[0].contents
+    #    first_cell_in_tbl.update_attribs(port="p1l")
+
+    return tbl
 
 def gv_node_component(component: Component) -> Table:
     # If no wires connected (except maybe loop wires)?
@@ -182,31 +340,6 @@ def nested_table(lines: List[Td]) -> Table:
         rows = Tr(Td(""))
     tbl = Table(rows, border=0, cellspacing=0, cellpadding=0)
     return tbl
-
-
-def gv_pin_table(component) -> Table:
-    pin_rows = []
-    for pin in component.pin_objects.values():
-        if component.should_show_pin(pin.id):
-            pin_rows.append(gv_pin_row(pin, component))
-    if len(pin_rows) == 0:
-        # TODO: write test for empty pin tables, and for unconnected connectors that hide disconnected pins
-        pass
-    tbl = Table(pin_rows, border=0, cellborder=1, cellpadding=3, cellspacing=0)
-    return tbl
-
-
-def gv_pin_row(pin, connector) -> Tr:
-    # ports in GraphViz are 1-indexed for more natural maping to pin/wire numbers
-    has_pincolors = any([_pin.color for _pin in connector.pin_objects.values()])
-    cells = [
-        Td(pin.id, port=f"p{pin.index+1}l") if connector.ports_left else None,
-        Td(pin.label, delete_if_empty=True),
-        Td(str(pin.color) if pin.color else "", sides="TBL") if has_pincolors else None,
-        Td(color_minitable(pin.color), sides="TBR") if has_pincolors else None,
-        Td(pin.id, port=f"p{pin.index+1}r") if connector.ports_right else None,
-    ]
-    return Tr(cells)
 
 
 def gv_connector_loops(connector: Connector) -> List:
@@ -421,52 +554,6 @@ def color_minitable(color: Optional[MultiColor]) -> Union[Table, str]:
         width=8 * len(cells),
         fixedsize="true",
     )
-
-
-def image_and_caption_cells(component: Component) -> (Td, Td):
-    if not component.image:
-        return (None, None)
-
-    image_tag = Img(scale=component.image.scale, src=component.image.src)
-    image_cell_inner = Td(image_tag, flat=True)
-    if component.image.fixedsize:
-        # further nest the image in a table with width/height/fixedsize parameters,
-        # and place that table in a cell
-        image_cell_inner.update_attribs(**html_size_attr_dict(component.image))
-        image_cell = Td(
-            Table(Tr(image_cell_inner), border=0, cellborder=0, cellspacing=0, id="!")
-        )
-    else:
-        image_cell = image_cell_inner
-
-    image_cell.update_attribs(
-        balign="left",
-        bgcolor=component.image.bgcolor.html,
-        sides="TLR" if component.image.caption else None,
-    )
-
-    if component.image.caption:
-        caption_cell = Td(
-            f"{html_line_breaks(component.image.caption)}", balign="left", sides="BLR"
-        )
-    else:
-        caption_cell = None
-    return (image_cell, caption_cell)
-
-
-def html_size_attr_dict(image):
-    # Return Graphviz HTML attributes to specify minimum or fixed size of a TABLE or TD object
-    pass
-
-    attr_dict = {}
-    if image:
-        if image.width:
-            attr_dict["width"] = image.width
-        if image.height:
-            attr_dict["height"] = image.height
-        if image.fixedsize:
-            attr_dict["fixedsize"] = "true"
-    return attr_dict
 
 
 def set_dot_basics(dot, options):
