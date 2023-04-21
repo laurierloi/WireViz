@@ -407,6 +407,16 @@ class WireClass(GraphicalComponent):
         self.category = BomCategory.WIRE
         super().__post_init__()
 
+    def wireinfo(self, parent_is_bundle=False):
+        wireinfo = []
+        if not parent_is_bundle and not self.is_shield:
+            wireinfo.append(self.id)
+        if self.color:
+            wireinfo.append(str(self.color))
+        if self.label:
+            wireinfo.append(self.label)
+        return ':'.join(wireinfo)
+
     @property
     def port(self):
         return f'w{self.index+1}'

@@ -295,7 +295,7 @@ def gv_conductor_table(cable) -> Table:
         cells_above = [
             Td(" " + ", ".join(ins), align="left"),
             Td(" "),  # increase cell spacing here
-            Td(":".join([wi for wi in wireinfo if wi is not None and wi != ""])),
+            Td(wire.wireinfo()),
             Td(" "),  # increase cell spacing here
             Td(", ".join(outs) + " ", align="right"),
         ]
