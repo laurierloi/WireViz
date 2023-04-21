@@ -14,7 +14,8 @@
   {% endif %}
 {% endblock %}
 
-{% block port_rows %}
+{% block ports %}
+  <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
   {% for pin in component.pins_to_show()  %}
     <tr>
       {% if component.ports_left %}  <td port="p{{ pin.index + 1 }}l"> {{ pin.id }} </td> {% endif %}
@@ -26,4 +27,5 @@
       {% if component.ports_right %} <td port="p{{ pin.index + 1 }}r"> {{ pin.id }} </td> {% endif %}
     </tr>
   {% endfor %}
+  </table>
 {% endblock %}

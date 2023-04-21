@@ -1,0 +1,53 @@
+{% import 'colors_macro.html' as colors %}
+{% extends "component_table.html" %}
+
+{% block header_extra_col %}
+  {% if bom_id %}
+  <td> BOM: {{ bom_id }} </td>
+  {% endif %}
+{% endblock %}
+
+{% block info_columns %}
+{% if component.type %}<td> {{ component.type }} </td> {% endif %}
+  {% if component.show_wirecount %} <td > {{ component.wirecount }}x </td> {% endif %}
+  {% if component.gauge_str_with_equiv %} <td> {{ component.gauge_str_with_equiv }} </td> {% endif %}
+  {% if component.shield %} <td> "+ S" </td> {% endif %}
+  <td> {{ component.length_str }} </td>
+  {% if component.color %} <td> {{ component.color }} </td> {% endif %}
+  {% if component.color %} {{ colors.colorbar_cells(component.color, component.color.len) }} {% endif %}
+{% endblock %}
+
+{% block ports %}
+   <table border="0" cellborder="0" cellspacing="0">
+    <tr>
+     <td>&nbsp;</td>
+    </tr>
+	{% for wire in component.wire_objects.values()  %}
+      {% if wire.is_shield %}
+        <tr>
+         <td>&nbsp;</td>
+        </tr>
+      {% endif %}
+	  <!-- Cable Top -->
+	  <tr>
+          <td align="left"> {{ component.wire_ins_str(wire.id) }} </td>
+          <td> </td>
+          <td> </td>
+          <td> </td>
+          <td align="right"> {{ component.wire_outs_str(wire.id) }}</td>
+	  </tr>
+	  <!-- Cable Drawing -->
+	  <tr>
+          <td border="0" cellspacing="0" colspan="5" height="2" port="{{ wire.port }}" > </td>
+	  </tr>
+	  <!-- Cable Bottom -->
+       <!--
+	  <tr>
+	  </tr>
+      -->
+	{% endfor %}
+    <tr>
+     <td>&nbsp;</td>
+    </tr>
+  </table>
+{% endblock %}
