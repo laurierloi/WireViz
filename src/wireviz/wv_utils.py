@@ -101,10 +101,12 @@ def bom2tsv(inp, header=None):
     return output
 
 
+# TODO: move to hyperlink
 def html_line_breaks(inp):
     return remove_links(inp).replace("\n", "<br />") if isinstance(inp, str) else inp
 
 
+# TODO: move to hyperlink
 def remove_links(inp):
     return (
         re.sub(r"<[aA] [^>]*>([^<]*)</[aA]>", r"\1", inp)
@@ -130,20 +132,6 @@ def is_arrow(inp):
     return bool(
         re.match(r"^\s*(?P<leftHead><?)(?P<body>-+|=+)(?P<rightHead>>?)\s*$", inp)
     )
-
-
-def aspect_ratio(image_src):
-    try:
-        from PIL import Image
-
-        image = Image.open(image_src)
-        if image.width > 0 and image.height > 0:
-            return image.width / image.height
-        print(f"aspect_ratio(): Invalid image size {image.width} x {image.height}")
-    # ModuleNotFoundError and FileNotFoundError are the most expected, but all are handled equally.
-    except Exception as error:
-        print(f"aspect_ratio(): {type(error).__name__}: {error}")
-    return 1  # Assume 1:1 when unable to read actual image size
 
 
 def smart_file_resolve(filename: Path, possible_paths: (Path, List[Path])) -> Path:

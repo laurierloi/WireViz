@@ -1,7 +1,9 @@
-
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from wireviz.wv_utils import awg_equiv, mm2_equiv, remove_links
+
+# TODO: use frozen dataclass
 @dataclass
 class PartNumberInfo:
     pn: str = ""
@@ -36,15 +38,17 @@ class PartNumberInfo:
         setattr(self, key, value)
 
     def __post_init__(self):
-        empty_if_none = lambda x: "" if x is None else str(x)
-
         if isinstance(self.pn, list):
             raise ValueError(f"pn ({self.pn}) should not be a list")
-        self.pn = empty_if_none(self.pn)
-        self.manufacturer = empty_if_none(self.manufacturer)
-        self.mpn = empty_if_none(self.mpn)
-        self.supplier = empty_if_none(self.supplier)
-        self.spn = empty_if_none(self.spn)
+
+        def clean_arg(arg):
+            return remove_links("" if arg is None else str(arg))
+
+        self.pn = clean_arg(self.pn)
+        self.manufacturer = clean_arg(self.manufacturer)
+        self.mpn = clean_arg(self.mpn)
+        self.supplier = clean_arg(self.supplier)
+        self.spn = clean_arg(self.spn)
 
     @property
     def bom_keys(self):
@@ -121,6 +125,8 @@ class PartNumberInfo:
             pn = pn.keep_only_eq(p)
         return pn
 
+    def as_list(self, parent_partnumbers=None):
+        return partnumbers2list(self, parent_partnumbers)
 
 def partnumbers2list(
     partnumbers: PartNumberInfo, parent_partnumbers: PartNumberInfo = None

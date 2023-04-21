@@ -199,6 +199,10 @@ class MultiColor:
         return [str(color) for color in out]
 
     @property
+    def len(self):
+        return len(self)
+
+    @property
     def html_padded(self):
         return ":".join(self.html_padded_list)
 

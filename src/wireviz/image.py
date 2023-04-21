@@ -5,6 +5,19 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from wireviz.hypertext import MultilineHypertext
 from wireviz.wv_colors import SingleColor
 
+def aspect_ratio(image_src):
+    try:
+        from PIL import Image
+
+        image = Image.open(image_src)
+        if image.width > 0 and image.height > 0:
+            return image.width / image.height
+        print(f"aspect_ratio(): Invalid image size {image.width} x {image.height}")
+    # ModuleNotFoundError and FileNotFoundError are the most expected, but all are handled equally.
+    except Exception as error:
+        print(f"aspect_ratio(): {type(error).__name__}: {error}")
+    return 1  # Assume 1:1 when unable to read actual image size
+
 @dataclass
 class Image:
     # Attributes of the image object <img>:
@@ -25,9 +38,9 @@ class Image:
 
         if not self.fixedsize:
             # Default True if any dimension specified unless self.scale also is specified.
-            self.fixedsize = (self.width or self.height) and self.scale is None
+            self.fixedsize = (self.width or self.height) and self.scale in ["", None]
 
-        if self.scale is None or self.scale is "":
+        if self.scale in [None, ""]:
             if not self.width and not self.height:
                 self.scale = "false"
             elif self.width and self.height:
