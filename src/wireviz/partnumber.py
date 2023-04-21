@@ -11,6 +11,7 @@ class PartNumberInfo:
     mpn: str = ""
     supplier: str = ""
     spn: str = ""
+    is_list: bool = False
 
     BOM_KEY_TO_COLUMNS = {
         "pn": "P/N",
@@ -97,8 +98,8 @@ class PartNumberInfo:
             else:
                 raise NotImplementedError(f"op {op} not supported")
 
-        if isinstance(other, list):
-            for item in other:
+        if other.is_list:
+            for item in other.pn_list:
                 part = part.clear_per_field(op, item)
         else:
             for k in ["pn", "manufacturer", "mpn", "supplier", "spn"]:
@@ -127,6 +128,24 @@ class PartNumberInfo:
 
     def as_list(self, parent_partnumbers=None):
         return partnumbers2list(self, parent_partnumbers)
+
+@dataclass
+class PartnumberInfoList:
+    pn_list: List[PartNumberInfo] = field(default_factory=list())
+    is_list: bool = True
+
+    def keep_only_eq(self, other):
+        for pn in self.pn_list:
+            yield pn.keep_only_eq(other)
+
+    def remove_eq(self, other):
+        for pn in self.pn_list:
+            yield pn.remove_eq(other)
+
+    def as_list(self, parent_partnumbers=None):
+        for pn in self.pn_list:
+            yield pn.as_list()
+
 
 def partnumbers2list(
     partnumbers: PartNumberInfo, parent_partnumbers: PartNumberInfo = None

@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from wireviz.hypertext import MultilineHypertext
 from wireviz.image import Image
 from wireviz.numbers import NumberAndUnit
-from wireviz.partnumber import PartNumberInfo, partnumbers2list
+from wireviz.partnumber import PartNumberInfo, PartnumberInfoList
 from wireviz.wv_bom import BomEntry
 from wireviz.wv_colors import (
     COLOR_CODES,
@@ -215,10 +215,6 @@ class Component:
             supplier=self.supplier,
             spn=self.spn,
         )
-
-    @property
-    def partnumbers_list(self):
-        return partnumbers2list(self.partnumbers)
 
 
 @dataclass
@@ -666,7 +662,7 @@ class Cable(WireClass):
     @property
     def partnumbers(self):
         if self.is_bundle:
-            return [w.partnumbers for w in self.wire_objects.values()]
+            return PartnumberInfoList(pn_list=[w.partnumbers for w in self.wire_objects.values()])
         else:
             return super().partnumbers
 

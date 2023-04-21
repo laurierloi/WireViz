@@ -20,9 +20,13 @@
     <td>
       <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
         <tr>
+          {% if component.partnumbers.is_list %}
+          <td> FILLME </td>
+          {% else %}
           {% for item in component.partnumbers.as_list() %}
           <td> {{item}} </td>
           {% endfor %}
+          {% endif %}
         </tr>
       </table>
     </td>

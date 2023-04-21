@@ -4,7 +4,6 @@ import re
 from typing import Any, List, Optional, Union
 
 from wireviz import APP_NAME, APP_URL, __version__
-from wireviz.partnumber import partnumbers2list
 from wireviz.wv_colors import MultiColor, SingleColor
 from wireviz.wv_dataclasses import (
     ArrowDirection,
@@ -91,16 +90,8 @@ def gv_node_cable(cable: Cable) -> Table:
     #line_ports = gv_conductor_table(component)
     line_wires = []
     params = {
-        'designator': f"{remove_links(cable.designator)}",
-        'type': html_line_breaks(cable.type),
-        'cable': cable,
-        'line_pn': partnumbers2list(cable.partnumbers),
+        'component': cable,
         'line_wires': line_wires,
-        'gauge': cable.gauge_str_with_equiv,
-        'shielded': cable.shield,
-        'length': cable.length_str,
-        'color': cable.color,
-        'color_len': len(cable.color),
         'image': cable.image,
         'line_notes': html_line_breaks(cable.notes),
         'additional_components': cable.additional_components,
@@ -125,11 +116,7 @@ def gv_node_component(component: Component) -> Table:
     else:
         line_name = None
 
-    line_pn = partnumbers2list(component.partnumbers)
-
-    is_simple_connector = (
-        isinstance(component, Connector) and component.style == "simple"
-    )
+    line_pn = component.partnumbers.as_list()
 
     if isinstance(component, Connector):
         line_info = [
@@ -334,9 +321,7 @@ def gv_conductor_table(cable) -> Table:
 
         # row below the wire
         if wire.partnumbers:
-            cells_below = partnumbers2list(
-                wire.partnumbers, parent_partnumbers=cable.partnumbers
-            )
+            cells_below = wire.partnumbers.as_list(parent_partnumbers=cable.partnumbers)
             if cells_below is not None and len(cells_below) > 0:
                 table_below = (
                     Table(
