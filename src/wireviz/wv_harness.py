@@ -29,8 +29,9 @@ from wireviz.wv_graphviz import (
     gv_connector_loops,
     gv_edge_mate,
     gv_edge_wire,
-    gv_node_component,
+    gv_node_cable,
     gv_node_connector,
+    gv_node_component,
     parse_arrow_str,
     set_dot_basics,
 )
@@ -368,10 +369,14 @@ class Harness:
             # TODO: PN info for bundles (per wire)
             gv_html = gv_node_component(cable)
             gv_html.update_attribs(bgcolor=calculate_node_bgcolor(cable, self.options))
+            template_html = gv_node_cable(cable)
+            print(gv_html)
+            #import pdb; pdb.set_trace()
             style = "filled,dashed" if cable.category == "bundle" else "filled"
             dot.node(
                 cable.designator,
-                label=f"<\n{gv_html}\n>",
+                #label=f"<\n{gv_html}\n>",
+                label=f"<\n{template_html}\n>",
                 shape="box",
                 style=style,
             )

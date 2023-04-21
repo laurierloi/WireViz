@@ -387,6 +387,8 @@ class WireClass(GraphicalComponent):
     length: Optional[NumberAndUnit] = None
     ignore_in_bom: Optional[bool] = False
 
+    is_shield = False
+
     def __hash__(self):
         return hash((self.partnumbers, self.gauge_str, str(self.color)))
 
@@ -404,6 +406,10 @@ class WireClass(GraphicalComponent):
     def __post_init__(self):
         self.category = BomCategory.WIRE
         super().__post_init__()
+
+    @property
+    def port(self):
+        return f'w{self.index+1}'
 
     @property
     def partnumbers(self):
@@ -557,6 +563,7 @@ class WireClass(GraphicalComponent):
 
 @dataclass
 class ShieldClass(WireClass):
+    is_shield = True
     pass  # TODO, for wires with multiple shields more shield details, ...
 
     def __hash__(self):
@@ -781,6 +788,24 @@ class Cable(WireClass):
     ) -> None:
         via_wire_obj = self.wire_objects[via_wire_id]
         self._connections.append(Connection(from_pin_obj, via_wire_obj, to_pin_obj))
+
+    def wire_ins(self, wire_id):
+        return [
+            str(c.from_) for c in self._connections
+            if c.via.id == wire_id and c.from_ is not None
+        ]
+
+    def wire_ins_str(self, wire_id):
+        return ', '.join(self.wire_ins(wire_id))
+
+    def wire_outs(self, wire_id):
+        return [
+            str(c.to) for c in self._connections
+            if c.via.id == wire_id and c.to is not None
+        ]
+
+    def wire_outs_str(self, wire_id):
+        return ', '.join(self.wire_outs(wire_id))
 
     def compute_qty_multipliers(self):
         # do not run before all connections in harness have been made!

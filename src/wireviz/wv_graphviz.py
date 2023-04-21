@@ -138,9 +138,9 @@ def gv_node_component(component: Component) -> Table:
     if component.color:
         line_info.extend(colorbar_cells(component.color))
 
-    line_image, line_image_caption = image_and_caption_cells(component)
-    line_additional_component_table = gv_additional_component_table(component)
-    line_notes = [html_line_breaks(component.notes)]
+    #line_image, line_image_caption = image_and_caption_cells(component)
+    #line_additional_component_table = gv_additional_component_table(component)
+    #line_notes = [html_line_breaks(component.notes)]
 
     line_ports = gv_conductor_table(component)
 
@@ -149,10 +149,10 @@ def gv_node_component(component: Component) -> Table:
         line_pn,
         line_info,
         line_ports,
-        line_image,
-        line_image_caption,
-        line_additional_component_table,
-        line_notes,
+        #line_image,
+        #line_image_caption,
+        #line_additional_component_table,
+        #line_notes,
     ]
 
     tbl = nested_table(lines)
@@ -351,7 +351,7 @@ def gv_wire_cell(wire: Union[WireClass, ShieldClass], colspan: int) -> Td:
         "cellpadding": 0,
         "colspan": colspan,
         "height": 2 * len(color_list),
-        "port": f"w{wire.index+1}",
+        "port": wire.port,
     }
     # ports in GraphViz are 1-indexed for more natural maping to pin/wire numbers
     wire_outer_cell = Td(wire_inner_table, **wire_outer_cell_attribs)
