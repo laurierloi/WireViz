@@ -1,92 +1,29 @@
 {% import 'colors_macro.html' as colors %}
-<!-- Connector definition Table !-->
-<table border="0" cellborder="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
-  <!-- Header !-->
-  <tr>
-    <td>
-      <table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="#FFFFFF">
-        <tr>
-          <td colspan="2"> <b> {{ designator }} </b> </td>
-          {% if bom_id %}
-          <td> BOM: {{ bom_id }} </td>
-          {% endif %}
-        </tr>
-      </table>
-    </td>
-  </tr>
-  <!-- Part Number !-->
-  {% if line_pn %}
-  <tr>
-    <td>
-      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
-        <tr>
-          {% for item in line_pn %}
-          <td> {{item}} </td>
-          {% endfor %}
-        </tr>
-      </table>
-    </td>
-  </tr>
-  {% endif %}
-  <!-- Info !-->
-  <tr>
-    <td>
-      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
-        <tr>
-          <td> {{ type }} </td>
-          <td> {{ subtype }} </td>
-          {% if show_pincount %} <td > {{ pincount }}-pin </td> {% endif %}
-          {% if color %} <td > {{ color }} </td> {% endif %}
-          {% if color %} {{ colors.colorbar_cells(color, color_len) }} {% endif %}
-        </tr>
-      </table>
-    </td>
-  </tr>
-  <!-- Pins !-->
-  <tr>
-    <td>
-      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
-        {% for pin in pins  %}
-          <tr>
-            {% if use_left %}  <td port="p{{ pin.index + 1 }}l"> {{ pin.id }} </td> {% endif %}
-            <td colspan="2"> {{ pin.label }} </td>
-            {% if has_pincolors %}
-            <td sides="TBL"> {{ pin.color }} </td>
-            <td sides="TBR"> { colors.color_minitable(pin.color, pin.color_len) } </td>
-            {% endif %}
-            {% if use_right %} <td port="p{{ pin.index + 1 }}r"> {{ pin.id }} </td> {% endif %}
-          </tr>
-        {% endfor %}
-      </table>
-    </td>
-  </tr>
-  <!-- Image !-->
-  {% if image %}
-  <tr>
-    <td>
-      {% include "images.html" %}
-    </td>
-  </tr>
-  {% endif %}
-  <!-- Additional Components !-->
-  {% if additional_components %}
-  <tr>
-    <td>
-      {% include "additional_components.html" %}
-    </td>
-  </tr>
-  {% endif %}
-  <!-- Notes !-->
-  {% if line_notes %}
-  <tr>
-    <td>
-      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
-        <tr>
-          <td> {{ line_notes }} </td>
-        </tr>
-      </table>
-    </td>
-  </tr>
-  {% endif %}
-</table>
+{% extends "component_table.html" %}
 
+{% block header_extra_col %}
+{% endblock %}
+
+{% block info_columns %}
+  <td> {{ component.type.clean }} </td>
+  <td> {{ component.subtype.clean }} </td>
+  {% if component.show_pincount %} <td > {{ component.pincount }}-pin </td> {% endif %}
+  {% if component.color %}
+      <td > {{ component.color }} </td>
+      {{ colors.colorbar_cells(component.color, component.color.len) }}
+  {% endif %}
+{% endblock %}
+
+{% block port_rows %}
+  {% for pin in component.pins_to_show()  %}
+    <tr>
+      {% if component.ports_left %}  <td port="p{{ pin.index + 1 }}l"> {{ pin.id }} </td> {% endif %}
+      <td colspan="2"> {{ pin.label }} </td>
+      {% if component.has_pincolors %}
+      <td sides="TBL"> {{ pin.color }} </td>
+      <td sides="TBR"> { colors.color_minitable(pin.color, pin.color.len) } </td>
+      {% endif %}
+      {% if component.ports_right %} <td port="p{{ pin.index + 1 }}r"> {{ pin.id }} </td> {% endif %}
+    </tr>
+  {% endfor %}
+{% endblock %}

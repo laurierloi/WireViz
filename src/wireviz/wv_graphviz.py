@@ -4,7 +4,7 @@ import re
 from typing import Any, List, Optional, Union
 
 from wireviz import APP_NAME, APP_URL, __version__
-from wireviz.wv_bom import partnumbers2list
+from wireviz.partnumber import partnumbers2list
 from wireviz.wv_colors import MultiColor, SingleColor
 from wireviz.wv_dataclasses import (
     ArrowDirection,
@@ -76,108 +76,41 @@ def image_and_caption_cells(component: Component) -> (Td, Td):
     return (image_cell, caption_cell)
 
 def gv_node_connector(connector: Connector) -> Table:
-    pins = []
-    use_left = bool(connector.ports_left)
-    use_right = bool(connector.ports_right)
-    has_pincolors = any([_pin.color for _pin in connector.pin_objects.values()])
-    for pin in connector.pin_objects.values():
-        if not connector.should_show_pin(pin.id):
-            continue
-        color = str(pin.color) if pin.color else "" if has_pincolors else None
-        pins.append({
-            'id': pin.id,
-            'index': pin.index,
-            'label': pin.label,
-            'color': color,
-            'color_len': len(pin.color),
-            'has_pincolors': has_pincolors,
-        })
-    columns = 2 + (1 if use_left else 0) + (1 if use_right else 0)
-    # TODO: group per line/item
-    params = {
-        'designator': f"{remove_links(connector.designator)}",
-        'use_left': use_left,
-        'use_right': use_right,
-        'line_pn': partnumbers2list(connector.partnumbers),
-        'pins': pins,
-        'columns': columns,
-        'bom_id': connector.bom_entry.id,
-        # TODO: support asdict(connector)
-        'type': html_line_breaks(connector.type),
-        'subtype': html_line_breaks(connector.subtype),
-        'pincount': connector.pincount,
-        'show_pincount': connector.show_pincount,
-        'color': connector.color,
-        'color_len': len(connector.color),
-        'image': connector.image,
-        'line_notes': html_line_breaks(connector.notes),
-        'additional_components': connector.additional_components,
-    }
     # TODO: extend connector style support
     is_simple_connector = connector.style == 'simple'
     template_name = "connector.html"
     if is_simple_connector:
         template_name = "simple-connector.html"
 
+    rendered = get_template(template_name).render({'component': connector})
+    cleaned_render = '\n'.join([l.rstrip() for l in rendered.split('\n') if l.strip()])
+    return cleaned_render
+
+def gv_node_cable(cable: Cable) -> Table:
+    # REPLACE:
+    #line_ports = gv_conductor_table(component)
+    line_wires = []
+    params = {
+        'designator': f"{remove_links(cable.designator)}",
+        'type': html_line_breaks(cable.type),
+        'cable': cable,
+        'line_pn': partnumbers2list(cable.partnumbers),
+        'line_wires': line_wires,
+        'gauge': cable.gauge_str_with_equiv,
+        'shielded': cable.shield,
+        'length': cable.length_str,
+        'color': cable.color,
+        'color_len': len(cable.color),
+        'image': cable.image,
+        'line_notes': html_line_breaks(cable.notes),
+        'additional_components': cable.additional_components,
+    }
+    # TODO: extend cable style support
+    template_name = "cable.html"
     rendered = get_template(template_name).render(params)
     cleaned_render = '\n'.join([l.rstrip() for l in rendered.split('\n') if l.strip()])
     return cleaned_render
-    ## If no wires connected (except maybe loop wires)?
-    #if isinstance(connector, Connector):
-    #    if not (connector.ports_left or connector.ports_right):
-    #        connector.ports_left = True  # Use left side pins by default
 
-    ## generate all rows to be shown in the node
-    #if connector.show_name:
-    #    str_name = f"{remove_links(connector.designator)}"
-    #    line_name = Td(str_name, bgcolor=connector.bgcolor_title.html)
-    #else:
-    #    line_name = None
-
-    #line_pn = partnumbers2list(connector.partnumbers)
-
-    #is_simple_connector = connector.style == 'simple'
-    #line_info = [
-    #    html_line_breaks(connector.type),
-    #    html_line_breaks(connector.subtype),
-    #    f"{connector.pincount}-pin" if connector.show_pincount else None,
-    #    str(connector.color) if connector.color else None,
-    #]
-
-    #if connector.color:
-    #    line_info.extend(colorbar_cells(connector.color))
-
-    #line_image, line_image_caption = image_and_caption_cells(connector)
-    ##line_additional_connector_table = gv_additional_component_table(connector)
-    #line_notes = [html_line_breaks(connector.notes)]
-
-    #if connector.style != "simple":
-    #    line_ports = gv_pin_table(connector)
-    #else:
-    #    line_ports = None
-
-    #lines = [
-    #    line_name,
-    #    line_pn,
-    #    line_info,
-    #    line_ports,
-    #    line_image,
-    #    line_image_caption,
-    #    line_additional_connector_table,
-    #    line_notes,
-    #]
-
-    #tbl = nested_table(lines)
-    #if is_simple_connector:
-    #    # Simple connectors have no pin table, and therefore, no ports to attach wires to.
-    #    # Manually assign left and right ports here if required.
-    #    # Use table itself for right port, and the first cell for left port.
-    #    # Even if the table only has one cell, two separate ports can still be assigned.
-    #    tbl.update_attribs(port="p1r")
-    #    first_cell_in_tbl = tbl.contents[0].contents
-    #    first_cell_in_tbl.update_attribs(port="p1l")
-
-    return tbl
 
 def gv_node_component(component: Component) -> Table:
     # If no wires connected (except maybe loop wires)?

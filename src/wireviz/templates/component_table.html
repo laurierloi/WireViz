@@ -1,0 +1,79 @@
+<!-- Component definition Table !-->
+<table border="0" cellborder="0" cellspacing="0" cellpadding="0" bgcolor="#FFFFFF">
+  <!-- Header !-->
+  <tr>
+    <td>
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="#FFFFFF">
+        <tr>
+          <td colspan="2"> <b> {{ component.designator }} </b> </td>
+          {% block header_extra_col %} {% endblock %}
+          {% if component.bom_entry.bom_id %}
+          <td> BOM: {{ component.bom_entry.bom_id }} </td>
+          {% endif %}
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Part Number !-->
+  {% if component.partnumbers %}
+  <tr>
+    <td>
+      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
+        <tr>
+          {% for item in component.partnumbers.as_list() %}
+          <td> {{item}} </td>
+          {% endfor %}
+        </tr>
+      </table>
+    </td>
+  </tr>
+  {% endif %}
+  <!-- Info !-->
+  <tr>
+    <td>
+      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
+        <tr>
+          {% block info_columns %} {% endblock %}
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <!-- Ports !-->
+  <tr>
+    <td>
+      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
+          {% block port_rows %} {% endblock %}
+      </table>
+    </td>
+  </tr>
+  <!-- Image !-->
+  {% if component.image %}
+  {% set image=component.image %}
+  <tr>
+    <td>
+      {% include "images.html" %}
+    </td>
+  </tr>
+  {% endif %}
+  <!-- Additional Components !-->
+  {% if component.additional_components %}
+  {% set additional_components=component.additional_components %}
+  <tr>
+    <td>
+      {% include "additional_components.html" %}
+    </td>
+  </tr>
+  {% endif %}
+  <!-- Notes !-->
+  {% if component.notes.raw %}
+  <tr>
+    <td>
+      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
+        <tr>
+          <td> {{ component.notes.clean }} </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  {% endif %}
+</table>
