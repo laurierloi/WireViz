@@ -401,6 +401,9 @@ class Harness:
         if "csv" in fmt:
             # TODO: implement CSV output (preferrably using CSV library)
             print("CSV output is not yet supported")
+        if "xlsx" in fmt:
+            bomlist = bom_list(self.bom, restrict_printed_lengths=False)
+            generate_xlsx_output(filename, bomlist)
         # HTML output
         if "html" in fmt:
             generate_html_output(filename, self.bom, self.metadata, self.options, self.notes)

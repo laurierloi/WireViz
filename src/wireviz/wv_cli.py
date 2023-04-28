@@ -217,9 +217,8 @@ def cli(
         shared_bom = ret["shared_bom"]
         extra_metadata["sheet_current"] += 1
 
-    shared_bom_base = None
     if "shared_bom" in output_formats:
-        shared_bom_base = generate_shared_bom(
+        generate_shared_bom(
             _output_dir,
             shared_bom,
             use_qty_multipliers=use_qty_multipliers,
