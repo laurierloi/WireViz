@@ -277,10 +277,10 @@ class Harness:
 
         for connector in self.connectors.values():
             # generate connector node
-            gv_html = gv_node_component(connector)
-            gv_html.update_attribs(
-                bgcolor=calculate_node_bgcolor(connector, self.options)
-            )
+            #gv_html = gv_node_component(connector)
+            #gv_html.update_attribs(
+            #    bgcolor=calculate_node_bgcolor(connector, self.options)
+            #)
             template_html = gv_node_connector(connector)
             #print(gv_html)
             #import pdb; pdb.set_trace()

@@ -117,7 +117,7 @@ def gv_node_component(component: Component) -> Table:
     line_pn = component.partnumbers.as_list()
 
     if isinstance(component, Connector):
-        raise RuntimeError()
+        raise RuntimeError('gv_node_component should not get called for connectors, use "gv_node_connector" instead')
     elif isinstance(component, Cable):
         line_info = [
             html_line_breaks(component.type),
