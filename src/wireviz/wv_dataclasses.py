@@ -168,7 +168,7 @@ class Component:
 
 
         self.type = MultilineHypertext.to(self.type)
-        self.subtype = MultilineHypertext.to(self.type)
+        self.subtype = MultilineHypertext.to(self.subtype)
 
         if isinstance(self.pn, list):
             raise RuntimeError(f"PN ({self.pn}) should not be a list")
