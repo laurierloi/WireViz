@@ -114,7 +114,9 @@ def gv_node_component(component: Component) -> Table:
     else:
         line_name = None
 
-    line_pn = component.partnumbers.as_list()
+    line_pn = [l for l in component.partnumbers.as_list()]
+    if len(line_pn) > 2:
+        line_pn = [line_pn[0], '(...)', line_pn[-1]]
 
     if isinstance(component, Connector):
         raise RuntimeError('gv_node_component should not get called for connectors, use "gv_node_connector" instead')
