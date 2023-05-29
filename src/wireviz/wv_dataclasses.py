@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, asdict, fields
 from enum import Enum, IntEnum
 from itertools import zip_longest
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -37,9 +37,6 @@ NoneOrMorePinIndices = Union[
 ]  # None, one, or a tuple of zero-based pin indices
 OneOrMoreWires = Union[Wire, Tuple[Wire, ...]]  # One or a tuple of wires
 
-# Metadata can contain whatever is needed by the HTML generation/template.
-MetadataKeys = PlainText  # Literal['title', 'description', 'notes', ...]
-
 
 Side = Enum("Side", "LEFT RIGHT")
 ArrowDirection = Enum("ArrowDirection", "NONE BACK FORWARD BOTH")
@@ -56,42 +53,6 @@ QtyMultiplierConnector = Enum(
 QtyMultiplierCable = Enum(
     "QtyMultiplierCable", "WIRECOUNT TERMINATION LENGTH TOTAL_LENGTH"
 )
-
-
-# TODO: standardize metadata to indicate which are supported...
-class Metadata(dict):
-    pass
-
-
-@dataclass
-class Options:
-    fontname: PlainText = "arial"
-    show_bom: bool = True
-    show_index_table: bool = False
-    show_notes: bool = True
-    notes_on_right: bool = True
-    notes_width: str = "100mm"
-    bgcolor: SingleColor = "WH"  # will be converted to SingleColor in __post_init__
-    bgcolor_node: SingleColor = "WH"
-    bgcolor_connector: SingleColor = None
-    bgcolor_cable: SingleColor = None
-    bgcolor_bundle: SingleColor = None
-    color_output_mode: ColorOutputMode = ColorOutputMode.EN_UPPER
-    mini_bom_mode: bool = True
-    template_separator: str = "."
-    _pad: int = 0
-    # TODO: resolve template and image paths during rendering, not during YAML parsing
-    _template_paths: [List] = field(default_factory=list)
-    _image_paths: [List] = field(default_factory=list)
-
-    def __post_init__(self):
-        self.bgcolor = SingleColor(self.bgcolor)
-        self.bgcolor_node = SingleColor(self.bgcolor_node) or self.bgcolor
-        self.bgcolor_connector = (
-            SingleColor(self.bgcolor_connector) or self.bgcolor_node
-        )
-        self.bgcolor_cable = SingleColor(self.bgcolor_cable) or self.bgcolor_node
-        self.bgcolor_bundle = SingleColor(self.bgcolor_bundle) or self.bgcolor_cable
 
 
 @dataclass

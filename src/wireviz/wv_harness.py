@@ -9,6 +9,8 @@ from graphviz import Graph
 from wireviz import APP_NAME, APP_URL, __version__
 import wireviz.wv_colors
 from wireviz.wv_bom import bom_list
+from wireviz.metadata import Metadata
+from wireviz.page_options import PageOptions
 from wireviz.wv_dataclasses import (
     Arrow,
     ArrowWeight,
@@ -18,8 +20,6 @@ from wireviz.wv_dataclasses import (
     Connector,
     MateComponent,
     MatePin,
-    Metadata,
-    Options,
     Side,
 )
 from wireviz.wv_graphviz import (
@@ -44,7 +44,7 @@ from wireviz.wv_templates import get_template
 @dataclass
 class Harness:
     metadata: Metadata
-    options: Options
+    options: PageOptions
     additional_bom_items: List[Component] = field(default_factory=list)
     shared_bom: Dict = field(default_factory=dict)
 

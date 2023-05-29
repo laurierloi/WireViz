@@ -11,9 +11,10 @@ from weasyprint import HTML
 import wireviz  # for doing wireviz.__file__
 from wireviz.wv_bom import bom_list
 from wireviz.wv_utils import bom2tsv
-from wireviz.wv_dataclasses import Metadata, Options
 from wireviz.wv_harness_quantity import HarnessQuantity
 from wireviz.wv_templates import get_template
+from wireviz.metadata import Metadata
+from wireviz.page_options import PageOptions, get_page_options
 
 mime_subtype_replacements = {"jpg": "jpeg", "tif": "tiff"}
 
@@ -64,10 +65,8 @@ def embed_svg_images_file(
 
 def generate_pdf_output(
     filename_list: List[Path],
-    options: Dict = None,
 ):
-    """Generate a pdf output, options are ignored for now, expect the formatting
-    to be done within the html files
+    """Generate a pdf output
     """
     if isinstance(filename_list, Path):
         filename_list = [filename_list]
@@ -112,11 +111,12 @@ def generate_shared_bom(
     return shared_bom_base, shared_bomlist
 
 
+# TODO: should define the dataclass needed to avoid doing any dict shuffling in here
 def generate_html_output(
     filename: Path,
     bom: List[List[str]],
     metadata: Metadata,
-    options: Options,
+    options: PageOptions,
 ):
     print("Generating html output")
     template_name = metadata.get("template", {}).get("name", "simple")
@@ -223,6 +223,7 @@ def generate_html_output(
 def generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=False):
     print("Generating titlepage")
 
+    # TODO: index_table as a self contained method
     index_table_content = []
     index_table_content.append((1, extra_metadata["titlepage"], ""))
 
@@ -263,15 +264,9 @@ def generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=False):
         "notes_width": "200mm",
     }
     titlepage_metadata["template"]["name"] = "titlepage"
-    titlepage_options = {
-        "show_bom": True,
-        "show_index_table": True,
-        "show_notes": True,
-        **yaml_data.get("options", {}),
-    }
     generate_html_output(
         extra_metadata["output_dir"] / extra_metadata["titlepage"],
         bom=bom_list(shared_bom, restrict_printed_lengths=False, filter_entries=True),
         metadata=Metadata(**titlepage_metadata),  # TBD what we need to add here
-        options=Options(**titlepage_options),
+        options=get_page_options(yaml_data, 'titlepage'),
     )
