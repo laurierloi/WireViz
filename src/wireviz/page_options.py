@@ -6,10 +6,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from .wv_dataclasses import PlainText
 from wireviz.wv_colors import (
     ColorOutputMode,
-    MultiColor,
     SingleColor,
-    get_color_by_colorcode_index,
 )
+
 
 @dataclass
 class PageFormatOptions:
@@ -19,6 +18,7 @@ class PageFormatOptions:
     notes_on_right: bool = True
     notes_width: str = "100mm"
 
+
 @dataclass
 class DiagramColorOpions:
     bgcolor: SingleColor = "WH"  # will be converted to SingleColor in __post_init__
@@ -27,6 +27,7 @@ class DiagramColorOpions:
     bgcolor_cable: SingleColor = None
     bgcolor_bundle: SingleColor = None
     color_output_mode: ColorOutputMode = ColorOutputMode.EN_UPPER
+
     def __post_init__(self):
         self.bgcolor = SingleColor(self.bgcolor)
         self.bgcolor_node = SingleColor(self.bgcolor_node) or self.bgcolor
@@ -36,6 +37,8 @@ class DiagramColorOpions:
         self.bgcolor_cable = SingleColor(self.bgcolor_cable) or self.bgcolor_node
         self.bgcolor_bundle = SingleColor(self.bgcolor_bundle) or self.bgcolor_cable
 
+
+# TODO: custom options for TitlePage, BOMPage, NotesPage, HarnessPage?
 # TODO: have options tree instead of unwrapping?
 @dataclass
 class PageOptions(PageFormatOptions, DiagramColorOpions):
@@ -48,8 +51,8 @@ class PageOptions(PageFormatOptions, DiagramColorOpions):
     _image_paths: [List] = field(default_factory=list)
 
     def __post_init(self):
-        DiagramColorOpions.__post_init__(self)
-        PageFormatOpions.__post_init__(self)
+        DiagramColorOptions.__post_init__(self)
+        PageFormatOptions.__post_init__(self)
 
 
 def get_page_options(parsed_data, page_name: str):
