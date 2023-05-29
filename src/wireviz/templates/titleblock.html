@@ -69,9 +69,9 @@
     {% set index = 8 - row %}
     {% if row == 9 %}
       <td class={{ rev }}><b>Rev</td>
-      <td class={{ changelog }}><b>Date</td>
-      <td class={{ date }}><b>Name</td>
-      <td class={{ name }}><b>Changelog</td>
+      <td class={{ date }}><b>Date</td>
+      <td class={{ name }}><b>Name</td>
+      <td class={{ changelog }}><b>Changelog</td>
     {% elif revisions|length > index %}
       {% set revision = revisions[index] %}
       <td class=rev> {{ revision.rev }} </td>
