@@ -263,10 +263,6 @@ class Connector(GraphicalComponent):
         self.bgcolor_title = SingleColor(self.bgcolor_title)
         self.color = MultiColor(self.color)
 
-        # connectors do not support custom qty or amount
-        self.qty = NumberAndUnit(1, None)
-        self.amount = None
-
         if isinstance(self.image, dict):
             self.image = Image(**self.image)
 
