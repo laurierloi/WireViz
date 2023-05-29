@@ -161,6 +161,11 @@ def cli(
         if "pdf" in harness_output_formats:
             harness_output_formats.remove("pdf")
 
+    # ensure files are sorted
+    files_list = list(files)
+    files_list.sort()
+    files = tuple(files_list)
+
     # run WireVIz on each input file
     for _file in files:
         _output_name = _file.stem if not output_name else output_name
