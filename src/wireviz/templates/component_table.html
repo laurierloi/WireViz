@@ -7,8 +7,8 @@
         <tr>
           <td colspan="2"> <b> {{ component.designator }} </b> </td>
           {% block header_extra_col %} {% endblock %}
-          {% if component.bom_entry.bom_id %}
-          <td> BOM: {{ component.bom_entry.bom_id }} </td>
+          {% if component.bom_entry.id %}
+          <td> BOM: {{ component.bom_entry.id }} </td>
           {% endif %}
         </tr>
       </table>

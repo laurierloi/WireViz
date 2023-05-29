@@ -22,7 +22,7 @@
   {% endif %}
 {%- endmacro %}
 
-{% macro colorbar_cells(color, color_len, port_last, mini=false) -%}
+{% macro colorbar_cells(color, color_len, port_last="", mini=false) -%}
   {% for subcolor in color.colors %}
     {% if loop.index == 1 %}
       {%set is_first = "true" %}

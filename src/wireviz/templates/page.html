@@ -7,8 +7,8 @@
   <title> {% block page_title %} Page {% endblock %} </title>
   <style>
     body {
-      font-family:  {{ fontname }};
-      background-color:  {{ bgcolor }};
+      font-family:  {{ options.fontname }};
+      background-color:  {{ options.bgcolor.html }};
     }
     /* Canvas size based on DIN 823 / DIN 6771 / EN ISO 5457 */
 

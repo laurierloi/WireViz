@@ -8,8 +8,8 @@
 
   .A3 #bom, .A2 #bom { /* BOM to the left of title block */
     position: absolute;
-    {% if bom_updated_position %}
-    {{ bom_updated_position }}
+    {% if options.bom_updated_position %}
+    {{ options.bom_updated_position }}
     {% else %}
     bottom: 0mm;
     left: 0mm;

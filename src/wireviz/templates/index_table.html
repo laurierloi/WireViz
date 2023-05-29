@@ -8,9 +8,12 @@
 
   .A3 #index_table, .A2 #index_table { /* index_table to the left of title block */
     position: absolute;
-    {% if index_table_updated_position %}
-    {{ index_table_updated_position }}
-    {% elif show_bom %}
+    {% if options.index_table_updated_position %}
+    {{ options.index_table_updated_position }}
+    {% elif options.index_table_on_right %}
+    top: 20mm;
+    right: 20mm;
+    {% elif options.show_bom %}
     top: {{ 20 + (bom_rows + 2) * 4.25 + 10}}mm;
     left: 10mm;
     {% else %}

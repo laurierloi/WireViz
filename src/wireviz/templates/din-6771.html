@@ -4,7 +4,7 @@
 <style>
 
     /* custom count of rows depending on the sheetsize */
-    {% if not show_bom %}
+    {% if not options.show_bom %}
       {% set bottom_rows = titleblock_rows + 1 %}
     {% elif sheetsize == 'A4' %}
       {% set bottom_rows = bom_rows + titleblock_rows + 1 %}
@@ -45,11 +45,11 @@
       {{ diagram }}
     </div>
 
-    {% if show_notes %}
+    {% if options.show_notes %}
     {{ notes }}
     {% endif %}
 
-    {% if show_bom %}
+    {% if options.show_bom %}
     {{ bom }}
     {% endif %}
 {% endblock %}

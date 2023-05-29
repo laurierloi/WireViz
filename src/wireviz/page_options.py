@@ -13,7 +13,10 @@ from wireviz.wv_colors import (
 @dataclass
 class PageFormatOptions:
     show_bom: bool = True
+    bom_updated_position: str = ""
     show_index_table: bool = False
+    index_table_on_right: bool = False
+    index_table_updated_position: str = ""
     show_notes: bool = True
     notes_on_right: bool = True
     notes_width: str = "100mm"

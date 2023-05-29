@@ -7,15 +7,15 @@
 
 {% block frame_content %}
     <h1> {{ title }} </h1>
-    {% if show_notes %}
+    {% if options.show_notes %}
     {{ notes }}
     {% endif %}
 
-    {% if show_bom %}
+    {% if options.show_bom %}
     {{ bom }}
     {% endif %}
 
-    {% if show_index_table %}
+    {% if options.show_index_table %}
     {{ index_table }}
     {% endif %}
 {% endblock %}

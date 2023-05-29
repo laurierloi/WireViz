@@ -157,16 +157,11 @@ def generate_html_output(
 
     replacements = {
         "generator": f"{wireviz.APP_NAME} {wireviz.__version__} - {wireviz.APP_URL}",
-        "fontname": options.fontname,
-        "bgcolor": options.bgcolor.html,
-        "show_bom": options.show_bom,
-        "show_notes": options.show_notes,
-        "show_index_table": options.show_index_table,
-        "notes_on_right": options.notes_on_right,
-        "notes_width": options.notes_width,
+        "options": options,
         "diagram": svgdata,
         "sheet_current": sheet_current,
         "sheet_total": sheet_total,
+        # TODO: all this should be within a BomClass...
         "bom_reversed": bom_reversed,
         "bom_header": bom_header,
         "bom_content": bom_content,
@@ -174,15 +169,23 @@ def generate_html_output(
         "bom_rows": len(bom_content),
         "titleblock_rows": 9,
         "notes": notes,
+        "logo": "",
+        "index_table_header": "",
+        "index_table_content": "",
     }
 
     # prepare metadata replacements
     added_metadata = {
         "revisions": [],
         "authors": [],
+        "company": "",
+        "address": "",
+        "pn": "",
         "sheetsize": "A4",
         "orientation": "portrait",
+        "description": "",
     }
+
     if metadata:
         for item, contents in metadata.items():
             if item == "revisions":
@@ -208,6 +211,7 @@ def generate_html_output(
     replacements = {**replacements, **added_metadata}
 
     # prepare BOM
+    print(options)
     replacements["bom"] = get_template("bom.html").render(replacements)
 
     # prepare titleblock
@@ -267,14 +271,14 @@ def generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=False):
         "output_name": "titlepage",
         "index_table_header": ["Sheet", "Harness", "Notes"],
         "index_table_content": index_table_content,
-        "bom_updated_position": "top: 20mm; left: 10mm",
-        "notes_width": "200mm",
     }
     titlepage_metadata["template"]["name"] = "titlepage"
+    options = get_page_options(yaml_data, "titlepage")
+    options.bom_updated_position = "top: 20mm; left: 10mm"
     generate_html_output(
         extra_metadata["output_dir"] / extra_metadata["titlepage"],
         bom=bom_list(shared_bom, restrict_printed_lengths=False, filter_entries=True),
         metadata=Metadata(**titlepage_metadata),  # TBD what we need to add here
-        options=get_page_options(yaml_data, "titlepage"),
+        options=options,
         notes=get_page_notes(yaml_data, "titlepage")
     )
