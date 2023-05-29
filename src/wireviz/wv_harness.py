@@ -117,6 +117,7 @@ class Harness:
                 if cable.category == "bundle"
                 for wire in cable.wire_objects.values()
             ]
+            + self.additional_bom_items
             + all_subitems
         )
 
