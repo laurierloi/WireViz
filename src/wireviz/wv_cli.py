@@ -186,6 +186,7 @@ def cli(
             shared_bom=shared_bom,
         )
         shared_bom = ret["shared_bom"]
+        extra_metadata["sheet_current"] += 1
 
     shared_bom_base = None
     if "shared_bom" in output_formats:
