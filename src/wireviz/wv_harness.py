@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import logging
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List
@@ -217,7 +218,10 @@ class Harness:
                     if connector.pinlabels.count(pin) > 1:
                         raise Exception(f"{name}:{pin} is defined more than once.")
                     index = connector.pinlabels.index(pin)
-                    pin = connector.pins[index]  # map pin name to pin number
+                    try:
+                        pin = connector.pins[index]  # map pin name to pin number
+                    except IndexError as e:
+                        logging.warning(f'no pin at index {index} which should match label {pin}')
                     if name == from_name:
                         from_pin = pin
                     if name == to_name:
@@ -265,7 +269,11 @@ class Harness:
         else:
             to_pin_obj = None
 
-        self.cables[via_name]._connect(from_pin_obj, via_wire, to_pin_obj)
+        try:
+            self.cables[via_name]._connect(from_pin_obj, via_wire, to_pin_obj)
+        except Exception as e:
+            logging.warning(f'fail to connect cable {via_name}, from_pin: {from_pin}, via_wire: {via_wire}, to_pin: {to_pin}\n\texception:{e}')
+            raise
         if from_name in self.connectors:
             self.connectors[from_name].activate_pin(from_pin, Side.RIGHT)
         if to_name in self.connectors:
