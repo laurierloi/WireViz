@@ -146,7 +146,7 @@ class BomEntry:
                 content = [
                     f'{name}: {info["qty"]}' for name, info in self.per_harness.items()
                 ]
-                if len(content) > 1:
+                if len(content) > 0:
                     d[k] = ", ".join(content)
             else:
                 d[k] = self[k]
@@ -189,7 +189,7 @@ class BomEntry:
         self.qty = qty
         self.scaled_per_harness = True
 
-def bom_list(bom, restrict_printed_lengths=True, filter_entries=False):
+def bom_list(bom, restrict_printed_lengths=True, filter_entries=False, no_per_harness=True):
     entries_as_dict = []
     bom_columns = []
     has_content = set()
@@ -199,6 +199,8 @@ def bom_list(bom, restrict_printed_lengths=True, filter_entries=False):
         entry_as_dict = entry.bom_dict_pretty_column
         entries_as_dict.append(entry_as_dict)
         for k in entry_as_dict:
+            if no_per_harness and k == 'Per Harness':
+                continue
             if k not in bom_columns:
                 bom_columns.append(k)
             if entry_as_dict[k] is not None and entry_as_dict[k] != "":
@@ -207,6 +209,7 @@ def bom_list(bom, restrict_printed_lengths=True, filter_entries=False):
     headers = bom_columns
     if filter_entries:
         headers = [k for k in bom_columns if k in has_content]
+
 
     entries_as_list = []
     for entry in entries_as_dict:
