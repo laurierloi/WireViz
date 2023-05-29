@@ -121,6 +121,7 @@ def generate_html_output(
     print("Generating html output")
     template_name = metadata.get("template", {}).get("name", "simple")
 
+    # TODO: instead provide a PageOption to generate or not the svg
     svgdata = None
     if template_name != "titlepage":
         # embed SVG diagram for all but the titlepage
@@ -190,7 +191,10 @@ def generate_html_output(
                     {"row": row, **v} for row, v in contents.items()
                 ]
             elif item == "pn":
-                added_metadata[item] = f'{contents}-{metadata.get("sheet_name")}'
+                sheet_name = metadata.get("sheet_name", "").upper()
+                if not sheet_name.startswith(contents.upper()):
+                    sheet_name = f'{contents.upper()}-{sheet_name}'
+                added_metadata[item] = sheet_name
             elif item == "template":
                 added_metadata["sheetsize"] = contents.get("sheetsize", "A4")
                 if added_metadata["sheetsize"] in ["A2", "A3"]:
