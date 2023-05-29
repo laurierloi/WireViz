@@ -2,7 +2,7 @@
   .A4 #notes { /* NOTES on top of BOM */
     position: absolute;
     {% if show_bom %}
-    bottom: {{ (titleblock_rows + bom_rows + 2) * 4.25 }}mm;
+    bottom: {{ (titleblock_rows + bom_rows + 3) * 4.25 }}mm;
     {% else %}
     bottom: {{ (titleblock_rows + 1) * 4.25 }}mm;
     {% endif %}
@@ -17,7 +17,7 @@
     {% else %}
     left: 0;
     {% if show_bom %}
-    bottom: {{ (bom_rows + 1) * 4.25 }}mm;
+    bottom: {{ (bom_rows + 2) * 4.25 }}mm;
     {% else %}
     bottom: 0;
     {% endif %}

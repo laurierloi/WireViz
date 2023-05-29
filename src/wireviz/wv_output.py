@@ -14,6 +14,7 @@ from wireviz.wv_utils import bom2tsv
 from wireviz.wv_harness_quantity import HarnessQuantity
 from wireviz.wv_templates import get_template
 from wireviz.metadata import Metadata
+from wireviz.notes import Notes, get_page_notes
 from wireviz.page_options import PageOptions, get_page_options
 
 mime_subtype_replacements = {"jpg": "jpeg", "tif": "tiff"}
@@ -117,6 +118,7 @@ def generate_html_output(
     bom: List[List[str]],
     metadata: Metadata,
     options: PageOptions,
+    notes: Notes,
 ):
     print("Generating html output")
     template_name = metadata.get("template", {}).get("name", "simple")
@@ -171,6 +173,7 @@ def generate_html_output(
         "bom_columns": bom_columns,
         "bom_rows": len(bom_content),
         "titleblock_rows": 9,
+        "notes": notes,
     }
 
     # prepare metadata replacements
@@ -211,7 +214,7 @@ def generate_html_output(
     replacements["titleblock"] = get_template("titleblock.html").render(replacements)
 
     # preparate Notes
-    if "notes" in replacements:
+    if "notes" in replacements and replacements["notes"].notes:
         replacements["notes"] = get_template("notes.html").render(replacements)
 
     # prepare index_table
@@ -272,5 +275,6 @@ def generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=False):
         extra_metadata["output_dir"] / extra_metadata["titlepage"],
         bom=bom_list(shared_bom, restrict_printed_lengths=False, filter_entries=True),
         metadata=Metadata(**titlepage_metadata),  # TBD what we need to add here
-        options=get_page_options(yaml_data, 'titlepage'),
+        options=get_page_options(yaml_data, "titlepage"),
+        notes=get_page_notes(yaml_data, "titlepage")
     )

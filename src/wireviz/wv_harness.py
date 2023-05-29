@@ -12,6 +12,7 @@ import wireviz.wv_colors
 from wireviz.wv_bom import bom_list
 from wireviz.metadata import Metadata
 from wireviz.page_options import PageOptions
+from wireviz.notes import Notes
 from wireviz.wv_dataclasses import (
     Arrow,
     ArrowWeight,
@@ -46,6 +47,7 @@ from wireviz.wv_templates import get_template
 class Harness:
     metadata: Metadata
     options: PageOptions
+    notes: Notes
     additional_bom_items: List[Component] = field(default_factory=list)
     shared_bom: Dict = field(default_factory=dict)
 
@@ -404,7 +406,7 @@ class Harness:
         # HTML output
         if "html" in fmt:
             bomlist = bom_list(self.bom, filter_entries=True)
-            generate_html_output(filename, bomlist, self.metadata, self.options)
+            generate_html_output(filename, bomlist, self.metadata, self.options, self.notes)
         # PDF output
         if "pdf" in fmt:
             generate_pdf_output(filename)

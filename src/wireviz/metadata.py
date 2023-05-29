@@ -11,7 +11,10 @@ class Metadata(dict):
 
     def __init__(self, **kwargs):
         if 'options' in kwargs:
-            logging.warning(f'Options should be defined externally to metadata!')
+            raise ValueError(f'Options should be defined externally to metadata!')
+
+        if 'notes' in kwargs:
+            raise ValueError(f'Notes should be defined externally to metadata!')
 
         for k, v in kwargs.items():
             self[k] = v
