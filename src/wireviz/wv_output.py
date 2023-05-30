@@ -211,7 +211,6 @@ def generate_html_output(
     replacements = {**replacements, **added_metadata}
 
     # prepare BOM
-    print(options)
     replacements["bom"] = get_template("bom.html").render(replacements)
 
     # prepare titleblock
