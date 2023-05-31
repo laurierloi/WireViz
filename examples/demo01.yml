@@ -1,5 +1,26 @@
 metadata:
   title: demo01
+  pn: demo-01
+  company: some company
+  address: 8888 fancy street west
+
+  authors:
+    created:
+      name: bob ross
+      date: 2023-03-29
+    reviewed:
+      name: n/a
+      date: n/a
+
+  revisions:
+    a:
+      name: bob ross
+      date: 2023-03-29
+      changelog: initial release
+
+  template:
+    name: din-6771
+    sheetsize: A3
 
 connectors:
   X1:

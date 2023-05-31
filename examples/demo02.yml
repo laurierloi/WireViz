@@ -2,6 +2,8 @@ metadata:
 
   title: WireViz Demo 2
   pn: WV-DEMO-02
+  company: some company
+  address: 8989 fancy street east
 
   authors:
     Created:
