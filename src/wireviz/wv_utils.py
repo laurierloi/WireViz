@@ -91,16 +91,6 @@ def flatten2d(inp):
     ]
 
 
-def bom2tsv(inp, header=None):
-    output = ""
-    if header is not None:
-        inp.insert(0, header)
-    for row in inp:
-        row = [item if item is not None else "" for item in row]
-        output = output + "\t".join(str(remove_links(item)) for item in row) + "\n"
-    return output
-
-
 # TODO: move to hyperlink
 def html_line_breaks(inp):
     return remove_links(inp).replace("\n", "<br />") if isinstance(inp, str) else inp

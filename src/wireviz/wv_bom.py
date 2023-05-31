@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Set, Tuple
 
 import tabulate as tabulate_module
 
 from wireviz.numbers import NumberAndUnit
 from wireviz.partnumber import PartNumberInfo
+from wireviz.wv_utils import remove_links
+from wireviz.wv_templates import get_template
 
 # TODO: different BOM modes
 # BomMode
@@ -16,6 +18,8 @@ from wireviz.partnumber import PartNumberInfo
 # "PN crossref" = "PN bubbles" + "hide PN info"
 # "additionally: BOM table in GV graph label (#227)"
 # "title block in GV graph label"
+
+
 
 @dataclass
 class BomEntry:
@@ -189,43 +193,106 @@ class BomEntry:
         self.qty = qty
         self.scaled_per_harness = True
 
-def bom_list(bom, restrict_printed_lengths=True, filter_entries=False, no_per_harness=True):
-    entries_as_dict = []
-    bom_columns = []
-    has_content = set()
-    # First pass, get all bom dict and identify filled columns
-    for entry in bom.values():
-        entry.restrict_printed_lengths = restrict_printed_lengths
-        entry_as_dict = entry.bom_dict_pretty_column
-        entries_as_dict.append(entry_as_dict)
-        for k in entry_as_dict:
-            if no_per_harness and k == 'Per Harness':
-                continue
-            if k not in bom_columns:
-                bom_columns.append(k)
-            if entry_as_dict[k] is not None and entry_as_dict[k] != "":
-                has_content.add(k)
-
-    headers = bom_columns
-    if filter_entries:
-        headers = [k for k in bom_columns if k in has_content]
+@dataclass(frozen=True)
+class BomRenderOptions:
+    restrict_printed_lengths: bool = True
+    filter_entries: bool = False
+    no_per_harness: bool = True
+    reverse: bool = False
 
 
-    entries_as_list = []
-    for entry in entries_as_dict:
-        entries_as_list.append([entry.get(k, "") for k in headers])
+@dataclass(frozen=True)
+class BomRender:
+    entries: List[Dict[str, str]]
+    columns: List[str]
+    has_content: Set[str] = field(default_factory=set())
+    options: BomRenderOptions = field(default_factory=BomRenderOptions())
 
-    # sanity check
-    expected_length = len(entries_as_list[0])
-    for e in entries_as_list:
-        assert len(e) == expected_length, f'entries {e} length is not {expected_length}'
+    private_content: List[Tuple[str]] = field(default_factory=list)
 
-    table = [headers] + entries_as_list
+    @property
+    def headers(self):
+        headers = self.columns
+        if self.options.filter_entries:
+            headers = [k for k in self.columns if k in self.has_content]
 
-    return table
+        if self.options.no_per_harness:
+            if 'Per Harness' in headers:
+                headers.remove('Per Harness')
+        return headers
+
+    @property
+    def content(self):
+        if not self.private_content:
+            headers = self.headers
+            entries_as_list = []
+            for entry in self.entries:
+                entries_as_list.append(tuple([entry.get(k, "") for k in headers]))
+
+            # sanity check
+            expected_length = len(entries_as_list[0])
+            for e in entries_as_list:
+                assert len(e) == expected_length, f'entries {e} length is not {expected_length}'
+
+            if self.options.reverse:
+                entries_as_list.reverse()
+
+            object.__setattr__(self, 'private_content', entries_as_list)
+
+        return self.private_content
+
+    @property
+    def columns_class(self):
+        return ["bom_col_{}".format("id" if c == "#" else c.lower()) for c in self.headers]
+
+    @property
+    def rows(self):
+        return len(self.entries)
+
+    def as_list(self):
+        return [self.headers] + self.content
+
+    def as_table(self):
+        return tabulate_module.tabulate(self.as_list(), headers="firstrow")
+
+    def as_tsv(self):
+        output = ""
+        for row in self.as_list():
+            row = [item if item is not None else "" for item in row]
+            output = output + "\t".join(str(remove_links(item)) for item in row) + "\n"
+        return output
+
+    def print_bom_table(self):
+        print('\n', self.as_table(), '\n')
+
+    def render(self, options):
+        return get_template("bom.html").render({"bom": self, "options": options})
 
 
-def print_bom_table(bom):
-    print()
-    print(tabulate_module.tabulate(bom_list(bom), headers="firstrow"))
-    print()
+@dataclass
+class BomContent:
+    '''Used to represent the bom'''
+    entries: Dict[str, BomEntry]
+
+    def get_bom_render(self, options: Union[BomRenderOptions, None] = None):
+        if options is None:
+            options = BomRenderOptions()
+
+        entries_as_dict = []
+        bom_columns = []
+        has_content = set()
+        for entry in self.entries.values():
+            entry.restrict_printed_lengths = options.restrict_printed_lengths
+            entry_as_dict = entry.bom_dict_pretty_column
+            entries_as_dict.append(entry_as_dict)
+            for k in entry_as_dict:
+                if k not in bom_columns:
+                    bom_columns.append(k)
+                if entry_as_dict[k] is not None and entry_as_dict[k] != "":
+                    has_content.add(k)
+        return BomRender(
+            entries=entries_as_dict,
+            columns=bom_columns,
+            has_content=has_content,
+            options=options,
+        )

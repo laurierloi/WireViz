@@ -195,7 +195,7 @@ def cli(
 
     shared_bom_base = None
     if "shared_bom" in output_formats:
-        shared_bom_base, shared_bomlist = generate_shared_bom(
+        shared_bom_base = generate_shared_bom(
             _output_dir,
             shared_bom,
             use_qty_multipliers=use_qty_multipliers,
