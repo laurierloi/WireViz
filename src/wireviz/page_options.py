@@ -41,13 +41,22 @@ class DiagramColorOpions:
         self.bgcolor_bundle = SingleColor(self.bgcolor_bundle) or self.bgcolor_cable
 
 
+@dataclass
+class ComponentDimensions:
+    bom_rows: int = 0
+    titleblock_rows: int = 9
+    bom_row_height: float = 4.25
+    titleblock_row_height: float = 4.25
+    index_table_row_height: float = 4.25
+
 # TODO: custom options for TitlePage, BOMPage, NotesPage, HarnessPage?
 # TODO: have options tree instead of unwrapping?
 @dataclass
-class PageOptions(PageFormatOptions, DiagramColorOpions):
+class PageOptions(ComponentDimensions, PageFormatOptions, DiagramColorOpions):
     fontname: PlainText = "arial"
     mini_bom_mode: bool = True
     template_separator: str = "."
+    for_pdf = False
     _pad: int = 0
     # TODO: resolve template and image paths during rendering, not during YAML parsing
     _template_paths: [List] = field(default_factory=list)
