@@ -4,18 +4,19 @@ import base64
 import re
 from pathlib import Path
 from typing import Dict, List, Union
+from dataclasses import dataclass, field, asdict, fields
 import logging
 
 from weasyprint import HTML
 
 import wireviz  # for doing wireviz.__file__
-from wireviz.wv_bom import bom_list
-from wireviz.wv_utils import bom2tsv
+from wireviz.wv_bom import BomContent, BomRenderOptions
 from wireviz.wv_harness_quantity import HarnessQuantity
 from wireviz.wv_templates import get_template
 from wireviz.metadata import Metadata
 from wireviz.notes import Notes, get_page_notes
 from wireviz.page_options import PageOptions, get_page_options
+from wireviz.index_table import IndexTable
 
 mime_subtype_replacements = {"jpg": "jpeg", "tif": "tiff"}
 
@@ -104,12 +105,18 @@ def generate_shared_bom(
         for bom_item in shared_bom.values():
             bom_item.scale_per_harness(qty_multipliers)
 
-    shared_bomlist = bom_list(shared_bom, restrict_printed_lengths=False, filter_entries=True, no_per_harness=False)
+    bom_render = BomContent(shared_bom).get_bom_render(
+        options=BomRenderOptions(
+            restrict_printed_lengths=False,
+            filter_entries=True,
+            no_per_harness=False,
+            reverse=False,
+        )
+    )
 
-    shared_bom_tsv = bom2tsv(shared_bomlist)
-    shared_bom_file.open("w").write(shared_bom_tsv)
+    shared_bom_file.open("w").write(bom_render.as_tsv())
 
-    return shared_bom_base, shared_bomlist
+    return shared_bom_base
 
 
 # TODO: should define the dataclass needed to avoid doing any dict shuffling in here
@@ -119,9 +126,27 @@ def generate_html_output(
     metadata: Metadata,
     options: PageOptions,
     notes: Notes,
+    rendered: Dict[str, str] = None,
+    bom_render_options: BomRenderOptions = None,
 ):
     print("Generating html output")
-    template_name = metadata.get("template", {}).get("name", "simple")
+    assert metadata and isinstance(metadata, Metadata), 'metadata should be defiend'
+    template_name = metadata.template.name
+
+    if rendered is None:
+        rendered = {}
+
+    if bom_render_options is None:
+        bom_render_options = BomRenderOptions(
+            restrict_printed_lengths=True,
+            filter_entries=True,
+            no_per_harness=True,
+            reverse=metadata.template.has_bom_reversed(),
+        )
+
+    bom_render = BomContent(bom).get_bom_render(options=bom_render_options)
+    options.bom_rows = bom_render.rows
+    rendered['bom'] = bom_render.render(options=options)
 
     # TODO: instead provide a PageOption to generate or not the svg
     svgdata = None
@@ -135,96 +160,27 @@ def generate_html_output(
                 1,
             )
 
-    # generate BOM table
-    # generate BOM header (may be at the top or bottom of the table)
-    bom_reversed = (
-        False if template_name == "simple" or template_name == "titlepage" else True
-    )
-    bom_header = bom[0]
-    bom_columns = [
-        "bom_col_{}".format("id" if c == "#" else c.lower()) for c in bom_header
-    ]
-    bom_content = bom[1:]
-    if bom_reversed:
-        bom_content.reverse()
-
-    if metadata:
-        sheet_current = metadata["sheet_current"]
-        sheet_total = metadata["sheet_total"]
-    else:
-        sheet_current = 1
-        sheet_total = 1
-
     replacements = {
-        "generator": f"{wireviz.APP_NAME} {wireviz.__version__} - {wireviz.APP_URL}",
         "options": options,
         "diagram": svgdata,
-        "sheet_current": sheet_current,
-        "sheet_total": sheet_total,
-        # TODO: all this should be within a BomClass...
-        "bom_reversed": bom_reversed,
-        "bom_header": bom_header,
-        "bom_content": bom_content,
-        "bom_columns": bom_columns,
-        "bom_rows": len(bom_content),
-        "titleblock_rows": 9,
+        "metadata": metadata,
         "notes": notes,
-        "logo": "",
-        "index_table_header": "",
-        "index_table_content": "",
     }
 
-    # prepare metadata replacements
-    added_metadata = {
-        "revisions": [],
-        "authors": [],
-        "company": "",
-        "address": "",
-        "pn": "",
-        "sheetsize": "A4",
-        "orientation": "portrait",
-        "description": "",
-    }
-
-    if metadata:
-        for item, contents in metadata.items():
-            if item == "revisions":
-                added_metadata["revisions"] = [
-                    {"rev": rev, **v} for rev, v in contents.items()
-                ]
-            elif item == "authors":
-                added_metadata["authors"] = [
-                    {"row": row, **v} for row, v in contents.items()
-                ]
-            elif item == "pn":
-                sheet_name = metadata.get("sheet_name", "").upper()
-                if not sheet_name.startswith(contents.upper()):
-                    sheet_name = f'{contents.upper()}-{sheet_name}'
-                added_metadata[item] = sheet_name
-            elif item == "template":
-                added_metadata["sheetsize"] = contents.get("sheetsize", "A4")
-                if added_metadata["sheetsize"] in ["A2", "A3"]:
-                    added_metadata["orientation"] = "landscape"
-            else:
-                added_metadata[item] = contents
-
-    replacements = {**replacements, **added_metadata}
-
-    # prepare BOM
-    replacements["bom"] = get_template("bom.html").render(replacements)
+    # TODO: all rendering should be done within their respective classes
 
     # prepare titleblock
-    replacements["titleblock"] = get_template("titleblock.html").render(replacements)
+    rendered["titleblock"] = get_template("titleblock.html").render(replacements)
 
     # preparate Notes
     if "notes" in replacements and replacements["notes"].notes:
-        replacements["notes"] = get_template("notes.html").render(replacements)
-
-    # prepare index_table
-    replacements["index_table"] = get_template("index_table.html").render(replacements)
+        rendered["notes"] = get_template("notes.html").render(replacements)
 
     # generate page template
-    page_rendered = get_template(template_name, ".html").render(replacements)
+    page_rendered = get_template(template_name, ".html").render({
+        **replacements,
+        **rendered,
+    })
 
     # save generated file
     filename.with_suffix(".html").open("w").write(page_rendered)
@@ -233,51 +189,35 @@ def generate_html_output(
 def generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=False):
     print("Generating titlepage")
 
-    # TODO: index_table as a self contained method
-    index_table_content = []
-    index_table_content.append((1, extra_metadata["titlepage"], ""))
-
-    for index, page_name in enumerate(extra_metadata["output_names"]):
-        index_table_content.append((index + 2, page_name, ""))
-
-    if not for_pdf:
-        index_table_content = [
-            (
-                p[0],
-                f"<a href={Path(p[1]).with_suffix('.html')}>{p[1]}</a>",
-                p[2],
-            )
-            for p in index_table_content
-        ]
-
-    # if create_titlepage:
-    #    extra_metadata["index_table_content"].append([
-    #        sheet_current,
-    #        f"<a href={Path(_output_name).with_suffix('.html')}>{extra_metadata['sheet_name']}</a>",
-    #        "",
-    #    ])
-    # index_table_content.insert(0, [
-    #    1,
-    #    f"<a href={Path('titlepage').with_suffix('.html')}>Title Page</a>",
-    #    ''
-    # ])
-
     titlepage_metadata = {
         **yaml_data.get("metadata", {}),
         **extra_metadata,
         "sheet_current": 1,
         "sheet_name": "titlepage",
         "output_name": "titlepage",
-        "index_table_header": ["Sheet", "Harness", "Notes"],
-        "index_table_content": index_table_content,
     }
     titlepage_metadata["template"]["name"] = "titlepage"
+    metadata = Metadata(**titlepage_metadata)
+    index_table = IndexTable.from_pages_metadata(metadata)
+
+    bom_render_options = BomRenderOptions(
+        restrict_printed_lengths=False,
+        filter_entries=True,
+        no_per_harness=True,
+        reverse=False,
+    )
+
+    #todo: index table options as a dataclass
     options = get_page_options(yaml_data, "titlepage")
     options.bom_updated_position = "top: 20mm; left: 10mm"
+    options.for_pdf = for_pdf
+
     generate_html_output(
         extra_metadata["output_dir"] / extra_metadata["titlepage"],
-        bom=bom_list(shared_bom, restrict_printed_lengths=False, filter_entries=True),
-        metadata=Metadata(**titlepage_metadata),  # TBD what we need to add here
+        bom=shared_bom,
+        metadata=metadata,
         options=options,
-        notes=get_page_notes(yaml_data, "titlepage")
+        notes=get_page_notes(yaml_data, "titlepage"),
+        rendered={'index_table': index_table.render(options)},
+        bom_render_options=bom_render_options,
     )
