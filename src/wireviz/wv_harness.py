@@ -9,7 +9,7 @@ from graphviz import Graph
 
 from wireviz import APP_NAME, APP_URL, __version__
 import wireviz.wv_colors
-from wireviz.wv_bom import bom_list
+from wireviz.wv_bom import BomRenderOptions, BomContent
 from wireviz.metadata import Metadata
 from wireviz.page_options import PageOptions
 from wireviz.notes import Notes
@@ -39,7 +39,6 @@ from wireviz.wv_output import (
     generate_html_output,
     generate_pdf_output,
 )
-from wireviz.wv_utils import bom2tsv
 from wireviz.wv_templates import get_template
 
 
@@ -393,16 +392,18 @@ class Harness:
             graph.save(filename=filename.with_suffix(".gv"))
         # BOM output
         if "tsv" in fmt:
-            bomlist = bom_list(self.bom, restrict_printed_lengths=False)
-            bom_tsv = bom2tsv(bomlist)
-            filename.with_suffix(".tsv").open("w").write(bom_tsv)
+            bom_render = BomContent(self.bom).get_bom_render(
+                options=BomRenderOptions(
+                    restrict_printed_lengths=False,
+                )
+            )
+            filename.with_suffix(".tsv").open("w").write(bom_render.as_tsv())
         if "csv" in fmt:
             # TODO: implement CSV output (preferrably using CSV library)
             print("CSV output is not yet supported")
         # HTML output
         if "html" in fmt:
-            bomlist = bom_list(self.bom, filter_entries=True)
-            generate_html_output(filename, bomlist, self.metadata, self.options, self.notes)
+            generate_html_output(filename, self.bom, self.metadata, self.options, self.notes)
         # PDF output
         if "pdf" in fmt:
             generate_pdf_output(filename)
