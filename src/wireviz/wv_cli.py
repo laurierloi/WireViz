@@ -160,6 +160,8 @@ def cli(
 
         if "pdf" in harness_output_formats:
             harness_output_formats.remove("pdf")
+    else:
+        extra_metadata["titlepage"] = None
 
     # ensure files are sorted
     files_list = list(files)
