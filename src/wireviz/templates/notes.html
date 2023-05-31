@@ -2,9 +2,9 @@
   .A4 #notes { /* NOTES on top of BOM */
     position: absolute;
     {% if options.show_bom %}
-    bottom: {{ (titleblock_rows + bom_rows + 3) * 4.25 }}mm;
+    bottom: {{ (options.titleblock_rows + 1) * options.titleblock_row_height + (options.bom_rows + 2) * options.bom_row_height }}mm;
     {% else %}
-    bottom: {{ (titleblock_rows + 1) * 4.25 }}mm;
+    bottom: {{ (options.titleblock_rows + 1) * options.titleblock_row_height }}mm;
     {% endif %}
     right: 0;
   }
@@ -13,11 +13,11 @@
     position: absolute;
     {% if options.notes_on_right %}
     right: 10mm;
-    bottom: {{ (titleblock_rows + 1) * 4.25 }}mm;
+    bottom: {{ (options.titleblock_rows + 1) * options.titleblock_row_height }}mm;
     {% else %}
     left: 0;
     {% if options.show_bom %}
-    bottom: {{ (bom_rows + 2) * 4.25 }}mm;
+    bottom: {{ (options.bom_rows + 2) * options.bom_row_height }}mm;
     {% else %}
     bottom: 0;
     {% endif %}

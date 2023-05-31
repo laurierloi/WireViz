@@ -1,12 +1,12 @@
 {% extends "page.html" %}
-{% block title %}titlepage {{ title }}{% endblock %}
+{% block title %}titlepage {{ metadata.title }}{% endblock %}
 {% block extra_head_style %}
 <style>
 </style>
 {% endblock %}
 
 {% block frame_content %}
-    <h1> {{ title }} </h1>
+    <h1> {{ metadata.title }} </h1>
     {% if options.show_notes %}
     {{ notes }}
     {% endif %}

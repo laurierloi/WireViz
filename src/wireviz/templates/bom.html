@@ -1,7 +1,7 @@
 <style>
   .A4 #bom { /* BOM on top of title block */
     position: absolute;
-    bottom: {{ (titleblock_rows + 1)  * 4.25 }}mm;
+    bottom: {{ (options.titleblock_rows + 1)  * options.titleblock_row_height }}mm;
     right: 0;
     width:180mm;
   }
@@ -17,7 +17,7 @@
   }
 
   #bom tr {
-    height: 4.25mm;
+    height: {{ options.bom_row_height }}mm;
   }
 
   #bom tr:nth-child(odd) {
@@ -45,8 +45,8 @@
 <!-- BOM HEADER GENERATION MACRO --!>
 {% macro bom_header_gen() -%}
     <tr>
-      {% for item in bom_header %}
-      <td class="{{bom_columns[loop.index0]}}"><b> {{ item }} </b></td>
+      {% for item in bom.headers %}
+      <td class="{{bom.columns_class[loop.index0]}}"><b> {{ item }} </b></td>
       {% endfor %}
     </tr>
 {%- endmacro %}
@@ -55,19 +55,19 @@
 <div id="bom">
   <b> BOM </b>
   <table>
-  {% if not bom_reversed %}
+  {% if not bom.options.reverse %}
     {{ bom_header_gen() }}
   {% endif %}
 
-  {% for row in bom_content %}
+  {% for row in bom.content %}
     <tr>
     {% for item in row %}
-      <td class="{{bom_columns[loop.index0]}}"> {{ item }} </td>
+      <td class="{{bom.columns_class[loop.index0]}}"> {{ item }} </td>
     {% endfor %}
     </tr>
   {% endfor %}
 
-  {% if bom_reversed %}
+  {% if bom.options.reverse %}
     {{ bom_header_gen() }}
   {% endif %}
 

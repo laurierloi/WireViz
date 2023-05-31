@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
-  <meta name="generator" content=" {{ generator }}">
+  <meta name="generator" content=" {{ metadata.generator }}">
   <title> {% block page_title %} Page {% endblock %} </title>
   <style>
     body {
@@ -53,7 +53,7 @@
       font-size: 2.8mm;
     }
 
-    {% set bottom_rows = titleblock_rows + 1 %}
+    {% set bottom_rows = options.titleblock_rows + 1 %}
 
   </style>
   {% block extra_head_style %}
@@ -61,7 +61,7 @@
   <style type="text/css" media="print">
 
     @page {
-      size: {{ sheetsize }} {{ orientation }};
+      size: {{ metadata.template.sheetsize.value }} {{ metadata.template.orientation.value }};
       margin: 0;
     }
 
@@ -75,7 +75,7 @@
 
 <body>
   <div id="page">
-    <div id="frame" class={{ sheetsize }}>
+    <div id="frame" class={{ metadata.template.sheetsize.value }}>
       {% block frame_content %} {% endblock %}
       {{ titleblock }}
     </div> <!-- /frame -->

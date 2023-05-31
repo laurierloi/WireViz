@@ -15,7 +15,7 @@
   }
 
   #titleblock tr {
-    height: 4.25mm;
+    height: {{ options.titleblock_row_height }}mm;
   }
 
   #titleblock .name {
@@ -41,19 +41,25 @@
 
   #titleblock .title {
     width: 82mm;
-    font-size: 4.25mm;
+    font-size: {{ options.titleblock_row_height }};
     text-align: center;
     white-space: normal;
   }
 
   #titleblock .company {
-    font-size: 3mm;
+    font-size: 4mm;
     text-align: center;
     white-space: normal;
   }
 
   #titleblock .partno {
     font-size: 4mm;
+    text-align: center;
+    white-space: normal;
+  }
+
+  #titleblock .revision {
+    font-size: 3mm;
     text-align: center;
     white-space: normal;
   }
@@ -72,9 +78,9 @@
       <td class=date><b>Date</td>
       <td class=name><b>Name</td>
       <td class=changelog><b>Changelog</td>
-    {% elif revisions|length > index %}
-      {% set revision = revisions[index] %}
-      <td class=rev> {{ revision.rev }} </td>
+    {% elif metadata.revisions_list|length > index %}
+      {% set revision = metadata.revisions_list[index] %}
+      <td class=rev> {{ revision.revision }} </td>
       <td class=date> {{ revision.date }} </td>
       <td class=name> {{ revision.name }} </td>
       <td class=changelog> {{ revision.changelog }} </td>
@@ -93,11 +99,11 @@
     <td class="process"></td>
     <td class="date"><b>Date</b></td>
     <td class="name"><b>Name</b></td>
-  {% elif authors|length > index %}
-    {% set author = authors[index] %}
-    <td><b> {{ author['row'] }} </b></td>
-    <td>    {{ author['date'] }}</td>
-    <td>    {{ author['name'] }}</td>
+  {% elif metadata.authors_list|length > index %}
+    {% set author = metadata.authors_list[index] %}
+    <td><b> {{ author.role }} </b></td>
+    <td>    {{ author.date }}</td>
+    <td>    {{ author.name }}</td>
   {% else %}
     <td></td>
     <td></td>
@@ -114,7 +120,7 @@
       <!-- AUTHOR INFO + LOGO   Column 5 to 7 --!>
       {{ author(1) }}
       <!-- HARNESS INFO         Column 8 to 10 --!>
-      <td class="company" colspan="4" rowspan="2"><b> {{ company }}</b></td>
+      <td class="company" colspan="4" rowspan="2"><b> {{ metadata.company }}</b></td>
     </tr>
 
     <tr> <!-- ROW 2 --!>
@@ -131,7 +137,7 @@
       <!-- AUTHOR INFO + LOGO   Column 5 to 7 --!>
       {{ author(3) }}
       <!-- HARNESS INFO         Column 8 to 10 --!>
-      <td class="address" colspan="4" rowspan="2"><small> {{ address }}</small></td>
+      <td class="address" colspan="4" rowspan="2"><small> {{ metadata.address }}</small></td>
     </tr>
 
     <tr> <!-- ROW 4 --!>
@@ -148,7 +154,7 @@
       <!-- AUTHOR INFO + LOGO   Column 5 to 7 --!>
       {{ author(5) }}
       <!-- HARNESS INFO         Column 8 to 10 --!>
-      <td class="title" colspan="4" rowspan="2"> {{ title }}</td>
+      <td class="title" colspan="4" rowspan="2"> {{ metadata.title }}</td>
     </tr>
 
     <tr> <!-- ROW 6 --!>
@@ -156,8 +162,8 @@
       {{ revision(6) }}
       <!-- AUTHOR INFO + LOGO   Column 5 to 7 --!>
       <td class="logo" colspan="3" rowspan="4" >
-       {% if logo %}
-         <img src={{ logo }} alt="" style="height:auto; width:150px;display:block;margin-left:auto;margin-right:auto" />
+       {% if metadata.logo %}
+         <img src={{ metadata.logo }} alt="" style="height:auto; width:150px;display:block;margin-left:auto;margin-right:auto" />
        {% endif %}
       </td>
       <!-- HARNESS INFO         Column 8 to 10 --!>
@@ -168,8 +174,8 @@
       {{ revision(7) }}
       <!-- AUTHOR INFO + LOGO   Column 5 to 7 --!>
       <!-- HARNESS INFO         Column 8 to 10 --!>
-      <td class="partno" colspan="3" rowspan="3"> {{ pn }}</td>
-      <td class="revision" colspan="1" rowspan="2"> {{ revision }}</td>
+      <td class="partno" colspan="3" rowspan="3"> {{ metadata.pn }}</td>
+      <td class="revision" colspan="1" rowspan="2"> REV {{ metadata.revision }}</td>
     </tr>
 
     <tr> <!-- ROW 8 --!>
@@ -184,7 +190,7 @@
       {{ revision(9) }}
       <!-- AUTHOR INFO + LOGO   Column 5 to 7 --!>
       <!-- HARNESS INFO         Column 8 to 10 --!>
-      <td class="sheetno" colspan="1">Sheet {{ sheet_current }} of {{ sheet_total }}</td>
+      <td class="sheetno" colspan="1">Sheet {{ metadata.sheet_current }} of {{ metadata.sheet_total }}</td>
     </tr>
 
   </table>

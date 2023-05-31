@@ -14,7 +14,7 @@
     top: 20mm;
     right: 20mm;
     {% elif options.show_bom %}
-    top: {{ 20 + (bom_rows + 2) * 4.25 + 10}}mm;
+    top: {{ 20 + (options.bom_rows + 2) * options.bom_row_height + 10}}mm;
     left: 10mm;
     {% else %}
     top: 20mm;
@@ -23,7 +23,7 @@
   }
 
   #index_table tr {
-    height: 4.25mm;
+    height: {{ options.index_table_row_height }};
   }
 
   #index_table tr:nth-child(odd) {
@@ -48,28 +48,23 @@
 </style>
 
 
-<!-- index_table HEADER GENERATION MACRO --!>
-{% macro index_table_header_gen() -%}
-    <tr>
-      {% for item in index_table_header %}
-      <td><b> {{ item }} </b></td>
-      {% endfor %}
-    </tr>
-{%- endmacro %}
-
 <!-- index_table TEMPLATE --!>
 <div id="index_table">
   <b> INDEX TABLE </b>
   <table>
-    {{ index_table_header_gen() }}
-
-  {% for row in index_table_content %}
+    <!-- header --!>
     <tr>
-    {% for item in row %}
+      {% for item in index_table.header %}
+      <td><b> {{ item }} </b></td>
+      {% endfor %}
+    </tr>
+    <!-- content --!>
+    {% for row in index_table.rows %}
+    <tr>
+    {% for item in row.get_items(options.for_pdf) %}
       <td> {{ item }} </td>
     {% endfor %}
     </tr>
-  {% endfor %}
-
+    {% endfor %}
   </table >
 </div>

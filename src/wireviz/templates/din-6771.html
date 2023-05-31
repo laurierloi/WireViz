@@ -5,19 +5,19 @@
 
     /* custom count of rows depending on the sheetsize */
     {% if not options.show_bom %}
-      {% set bottom_rows = titleblock_rows + 1 %}
-    {% elif sheetsize == 'A4' %}
-      {% set bottom_rows = bom_rows + titleblock_rows + 1 %}
+      {% set bottom_rows = (options.titleblock_rows + 1) * options.titleblock_row_height %}
+    {% elif metadata.template.sheetsize == 'A4' %}
+      {% set bottom_rows = options.bom_rows * options.bom_row_height + (options.titleblock_rows + 1) * options.titleblock_row_height %}
     {% else %}
-      {% set bottom_rows = [bom_rows, titleblock_rows]|max + 1 %}
+      {% set bottom_rows = [((options.bom_rows + 1) * options.bom_row_height), ((options.titleblock_rows + 1) * options.titleblock_row_height)]|max %}
     {% endif %}
 
     .A4 #diagram, .A3 #diagram {
-        height: {{ 277 - bottom_rows * 4.25 }}mm;
+        height: {{ 277 - bottom_rows }}mm;
     }
 
     .A2 #diagram {
-        height: {{ 400 - bottom_rows * 4.25 }}mm;
+        height: {{ 400 - bottom_rows }}mm;
     }
 
     #diagram {
