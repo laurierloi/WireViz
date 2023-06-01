@@ -136,6 +136,10 @@ def cli(
         print(f"{APP_NAME} {__version__}")
         return  # print version number only and exit
 
+    # ensure files are sorted
+    files_list = list(files)
+    files_list.sort()
+    files = tuple(files_list)
     _output_dir = files[0].parent if not output_dir else output_dir
 
     # determine output formats
@@ -146,15 +150,19 @@ def cli(
     # TODO: all of this metadata should be defined within a dataclass
     extra_metadata = {}
     extra_metadata["output_dir"] = _output_dir
-    extra_metadata["output_names"] = []
+    extra_metadata["files"] = files
+    extra_metadata["output_names"] = [_file.stem for _file in files]
     extra_metadata["sheet_total"] = len(files)
     extra_metadata["sheet_current"] = 1
+    extra_metadata["use_qty_multipliers"] = use_qty_multipliers
+    extra_metadata["multiplier_file_name"] = multiplier_file_name
 
     # Only generate the global pdf if there's multiple files
     create_titlepage = False
     if extra_metadata["sheet_total"] > 1:
         create_titlepage = True
         extra_metadata["titlepage"] = Path("titlepage")
+        extra_metadata["output_names"].insert(0, "titlepage")
         extra_metadata["sheet_current"] += 1
         extra_metadata["sheet_total"] += 1
 
@@ -163,15 +171,10 @@ def cli(
     else:
         extra_metadata["titlepage"] = None
 
-    # ensure files are sorted
-    files_list = list(files)
-    files_list.sort()
-    files = tuple(files_list)
 
     # run WireVIz on each input file
     for _file in files:
-        _output_name = _file.stem if not output_name else output_name
-        extra_metadata["output_names"].append(_output_name)
+        _output_name = _file.stem
 
         print("Input file:  ", _file)
         print(
@@ -216,10 +219,6 @@ def cli(
             extra_metadata["titlepage"] = extra_metadata["titlepage"].with_stem(
                 extra_metadata["titlepage"].stem + "_for_pdf"
             )
-            if create_titlepage:
-                extra_metadata["output_names"].insert(
-                    0, extra_metadata["titlepage"].with_suffix(".html")
-                )
 
             generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=True)
 

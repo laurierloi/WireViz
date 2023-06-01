@@ -79,6 +79,9 @@ class SheetMetadata():
 class PagesMetadata():
     titlepage: Path
     output_names: List[str]
+    files: List[str]
+    use_qty_multipliers: bool
+    multiplier_file_name: str
     pages_notes: Dict[str, str] = field(default_factory=dict)
 
 class PageTemplateTypes(str, Enum):

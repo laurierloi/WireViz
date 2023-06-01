@@ -100,10 +100,9 @@ def generate_shared_bom(
     if use_qty_multipliers:
         harnesses = HarnessQuantity(files, multiplier_file_name, output_dir=output_dir)
         harnesses.fetch_qty_multipliers_from_file()
-        qty_multipliers = harnesses.multipliers
-        print(f"Using quantity multipliers: {qty_multipliers}")
+        print(f"Using quantity multipliers: {harnesses.multipliers}")
         for bom_item in shared_bom.values():
-            bom_item.scale_per_harness(qty_multipliers)
+            bom_item.scale_per_harness(harnesses.multipliers)
 
     bom_render = BomContent(shared_bom).get_bom_render(
         options=BomRenderOptions(
