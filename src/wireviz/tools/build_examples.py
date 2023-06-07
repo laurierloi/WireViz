@@ -69,7 +69,7 @@ def build_generated(groupkeys):
                 [
                     "--formats",
                     "ghpstb",  # no pdf for now
-                    "--prepend",
+                    "--metadata",
                     yaml_files[0].parent / "metadata.yml",
                     *[str(f) for f in yaml_files],
                 ]
