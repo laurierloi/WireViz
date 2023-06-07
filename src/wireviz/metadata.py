@@ -84,6 +84,7 @@ class PagesMetadata():
     multiplier_file_name: str
     pages_notes: Dict[str, str] = field(default_factory=dict)
 
+
 class PageTemplateTypes(str, Enum):
     simple = 'simple'
     din_6771 = 'din-6771'
@@ -95,9 +96,11 @@ class SheetSizes(str, Enum):
     A3 = 'A3'
     A4 = 'A4'
 
+
 class Orientations(str, Enum):
     landscape = 'landscape'
     portrait = 'portrait'
+
 
 @dataclass(frozen=True)
 class PageTemplateConfig():
@@ -192,18 +195,3 @@ class Metadata(PagesMetadata, OutputMetadata, CompanyInfo, SheetMetadata, Docume
             titlepage=self.titlepage,
             output_names=self.output_names,
         )
-
-
-# TODO: standardize metadata to indicate which are supported...
-#class Metadata(dict):
-#    '''All data used to extend the informations on the pages'''
-#
-#    def __init__(self, **kwargs):
-#        if 'options' in kwargs:
-#            raise ValueError(f'Options should be defined externally to metadata!')
-#
-#        if 'notes' in kwargs:
-#            raise ValueError(f'Notes should be defined externally to metadata!')
-#
-#        for k, v in kwargs.items():
-#            self[k] = v
