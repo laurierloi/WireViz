@@ -156,6 +156,11 @@ def cli(
     files = tuple(files_list)
     _output_dir = files[0].parent if not output_dir else output_dir
 
+    # ensure components are sorted
+    components = list(components)
+    components.sort()
+    components = tuple(components)
+
     # determine output formats
     output_formats = {format_codes[f] for f in formats if f in format_codes}
     harness_output_formats = output_formats.copy()
