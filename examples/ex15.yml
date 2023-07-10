@@ -1,0 +1,37 @@
+# Test assigning pins with PINLABEL__PINNUMBER format and use idx/name combinations
+connectors:
+  X1:
+    type: Molex KK 254 # more information
+    subtype: female
+    pinlabels: [GND, VCC, RX_N, RX_P, TX_N, TX_P, GND, VCC]
+  X2:
+    type: Molex KK 254 # more information
+    subtype: female
+    pinlabels: [GND, VCC, RX_P, RX_N, TX_P, TX_N]
+  P3:
+    type: Molex KK 254
+    subtype: female
+    pinlabels: [GND, VCC]
+
+cables:
+  W1:
+    color_code: IEC # auto-color wires based on a standard
+    wirecount: 8 # need to specify number of wires explicitly when using a color code
+    gauge: 0.25 mm2 # also accepts AWG as unit
+    show_equiv: true # auto-calculate AWG equivalent from metric gauge
+    length: 0.2 # length in m
+    shield: true
+    type: Serial
+
+connections:
+  -
+    - X1: [1-6]
+    - W1: [1-6]
+    - X2: [1, 2, RX_N, RX_P, TX_N, TX_P]  # crossover
+  -  # connection from connector pin to wire shielding
+    - X1: 1
+    - W1: s
+  -  # connection from GND to power
+    - X1: [GND__7, VCC__8]
+    - W1: [7-8]
+    - P3: [GND, VCC]

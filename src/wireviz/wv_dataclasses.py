@@ -68,6 +68,10 @@ class PinClass:
 
     # TODO: support a "crimp" defined by parent
 
+    def __post_init__(self):
+        if self.label and '__' in self.label:
+            self.label, self.index = self.label.split('__')
+
     def __str__(self):
         snippets = [  # use str() for each in case they are int or other non-str
             str(self.parent) if not self._anonymous else "",
@@ -79,6 +83,7 @@ class PinClass:
     @property
     def category(self):
         return BomCategory.PIN
+
 
 
 @dataclass
@@ -268,8 +273,6 @@ class Connector(GraphicalComponent):
 
         self._ports_left_set = False
         self._ports_right_set = False
-
-        self.visible_pins = {}
 
         if self.style == "simple":
             if self.pincount and self.pincount > 1:

@@ -42,6 +42,7 @@ from wireviz.wv_output import (
 from wireviz.wv_templates import get_template
 
 
+
 @dataclass
 class Harness:
     metadata: Metadata
@@ -198,6 +199,15 @@ class Harness:
         to_name: str,
         to_pin: (int, str),
     ) -> None:
+        def clean_pin(pin):
+            '''Allow for a pin of the form "PINLABEL__PINNUMBER"'''
+            if isinstance(pin, str):
+                if "__" in pin:
+                    return int(pin.split("__")[1])
+            return pin
+
+        from_pin = clean_pin(from_pin)
+        to_pin = clean_pin(to_pin)
         # check from and to connectors
         for (name, pin) in zip([from_name, to_name], [from_pin, to_pin]):
             if name is not None and name in self.connectors:
