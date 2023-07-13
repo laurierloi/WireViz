@@ -70,7 +70,9 @@ class PinClass:
 
     def __post_init__(self):
         if self.label and '__' in self.label:
-            self.label, self.index = self.label.split('__')
+            label, index = self.label.split('__')
+            self.index = int(index)
+            self.label = label
 
     def __str__(self):
         snippets = [  # use str() for each in case they are int or other non-str
