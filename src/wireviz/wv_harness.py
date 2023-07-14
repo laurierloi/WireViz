@@ -200,41 +200,71 @@ class Harness:
         to_pin: (int, str),
     ) -> None:
         def clean_pin(pin):
-            '''Allow for a pin of the form "PINLABEL__PINNUMBER"'''
+            '''Allow for a pin of the form "PINLABEL__PINNUMBER"
+
+            This is a bit treacherous, because we actually allow PINNUMBER which are not int.
+            When this happens, the pinnumber will be considered as a pinlabel.
+            The logic below should handle that case
+
+            '''
+            pinlabel = None
+            pinnumber = None
             if isinstance(pin, str):
                 if "__" in pin:
-                    return int(pin.split("__")[1])
-            return pin
-
-        from_pin = clean_pin(from_pin)
-        to_pin = clean_pin(to_pin)
-        # check from and to connectors
-        for (name, pin) in zip([from_name, to_name], [from_pin, to_pin]):
-            if name is not None and name in self.connectors:
-                connector = self.connectors[name]
-                # check if provided name is ambiguous
-                if pin in connector.pins and pin in connector.pinlabels:
-                    if connector.pins.index(pin) != connector.pinlabels.index(pin):
-                        raise Exception(
-                            f"{name}:{pin} is defined both in pinlabels and pins, "
-                            "for different pins."
-                        )
-                    # TODO: Maybe issue a warning if present in both lists
-                    # but referencing the same pin?
-                if pin in connector.pinlabels:
-                    if connector.pinlabels.count(pin) > 1:
-                        raise Exception(f"{name}:{pin} is defined more than once.")
-                    index = connector.pinlabels.index(pin)
+                    pinlabel, pinnumber = pin.split("__")
+                    pinnumber = int(pinnumber)
+                else:
                     try:
-                        pin = connector.pins[index]  # map pin name to pin number
-                    except IndexError as e:
-                        logging.warning(f'no pin at index {index} which should match label {pin}')
-                    if name == from_name:
-                        from_pin = pin
-                    if name == to_name:
-                        to_pin = pin
-                if not pin in connector.pins:
-                    raise Exception(f"{name}:{pin} not found.")
+                        pinnumber = int(pin)
+                    except ValueError:
+                        pinlabel = pin
+            if isinstance(pin, int):
+                pinnumber = pin
+            return pinlabel, pinnumber
+
+        # check from and to connectors
+        for (name, (pinlabel, pinnumber)) in zip([from_name, to_name], [clean_pin(from_pin), clean_pin(to_pin)]):
+            if name is None or name not in self.connectors:
+                continue
+
+            connector = self.connectors[name]
+
+            pinlabel_indexes = None
+            pinnumber_index = None
+
+            if pinlabel is not None:
+                pinlabel_indexes = [i for i, x in enumerate(connector.pinlabels) if x == pinlabel]
+                if len(pinlabel_indexes) == 0:
+                    pinlabel_indexes = None
+                    if pinlabel in connector.pins:
+                        pinnumber = pinlabel
+                    else:
+                        raise ValueError(f"Pinlabel {pinlabel} is not in pinlabels of connector {name}")
+
+            if pinnumber is not None:
+                pinnumber_indexes = [i for i, x in enumerate(connector.pins) if x == pinnumber]
+                if len(pinnumber_indexes) > 1:
+                    raise ValueError(f"Pinnumber {pinnumber} is not unique in pins of connector {name}")
+                pinnumber_index = pinnumber_indexes[0]
+                if pinlabel_indexes is not None:
+                    if pinnumber_index not in pinlabel_indexes:
+                        raise ValueError(f"No pinnumber {pinnumber} matches pinlabel {pinlabel} in connector {name}, pinlabel for that pinnumber is {connector.pinlabels[pinnumber_index]}")
+            elif pinlabel_indexes is not None:
+                if len(pinlabel_indexes) > 1:
+                    pinnumber_indexes = [connector.pins[i] for i in pinlabel_indexes]
+                    raise ValueError(f"Pinlabel {pinlabel} is not unique in pinlabels of connector {name} (available pins are: {pinnumber_indexes}), and no pinnumber defined to disambiguate\nThe user can define a pinnumber by using the form PINLABEL__PINNUMBER, where the double underscore is the separator")
+                pinnumber_index = pinlabel_indexes[0]
+
+
+            if pinnumber_index is None:
+                raise ValueError(f"Neither pinlabel ({pinlabel}) or pinnumber ({pinnumber}) where found on connector {name}, pinlabels: {connector.pinlabels}, pinnumbers: {connector.pins})")
+
+            pin = connector.pins[pinnumber_index]
+            if name == from_name:
+                from_pin = pin
+            if name == to_name:
+                to_pin = pin
+
 
         # check via cable
         if via_name in self.cables:
