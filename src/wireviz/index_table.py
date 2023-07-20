@@ -16,7 +16,7 @@ class IndexTableRow():
     page: str
     quantity: Union[int, str] = 1
     notes: str = ''
-    use_quantity: bool= True
+    use_quantity: bool = True
 
     def get_items(self, for_pdf=False):
         if self.use_quantity:
@@ -36,9 +36,13 @@ class IndexTable():
     header: Tuple[str]
 
     @staticmethod
+    def use_quantity_column(metadata: PagesMetadata):
+        return metadata is not None and metadata.use_qty_multipliers
+
+    @staticmethod
     def get_index_table_header(metadata: PagesMetadata = None):
         skip = []
-        if metadata is not None and not metadata.use_qty_multipliers:
+        if not IndexTable.use_quantity_column(metadata):
             skip.append('quantity')
         return (s.capitalize() for s in TABLE_COLUMNS if s not in skip)
 
@@ -48,7 +52,7 @@ class IndexTable():
         header = cls.get_index_table_header(metadata)
         rows = []
         qty_multipliers = None
-        if metadata.use_qty_multipliers:
+        if cls.use_quantity_column(metadata):
             harnesses = HarnessQuantity(
                 metadata.files,
                 metadata.multiplier_file_name,
@@ -59,7 +63,13 @@ class IndexTable():
 
         for index, row in enumerate(metadata.output_names):
             if str(row) == 'titlepage':
-                rows.append(IndexTableRow(sheet=1, page=metadata.titlepage, quantity='', notes=''))
+                rows.append(IndexTableRow(
+                    sheet=1,
+                    page=metadata.titlepage,
+                    quantity='',
+                    notes='',
+                    use_quantity=cls.use_quantity_column(metadata)
+                ))
                 continue
             quantity = qty_multipliers[row] if qty_multipliers is not None else 1
             rows.append(IndexTableRow(
@@ -67,7 +77,7 @@ class IndexTable():
                 page=row,
                 quantity=quantity,
                 notes=metadata.pages_notes.get(row, ''),
-                use_quantity=metadata.use_qty_multipliers,
+                use_quantity=cls.use_quantity_column(metadata),
             ))
         return cls(rows=rows, header=header)
 
@@ -77,7 +87,3 @@ class IndexTable():
             "index_table": self,
             "options": options,
         })
-
-
-
-
