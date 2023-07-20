@@ -89,52 +89,90 @@ Read the [syntax description](syntax.md) to learn about WireViz' features and ho
 See the [tutorial page](../tutorial/readme.md) for sample code, as well as the [example gallery](../examples/readme.md) to see more of what WireViz can do.
 
 
-## Usage
 
-### Installation
+## Installation
+### Requirements
 
-#### Requirements
-
-WireViz requires Python 3.7 or later.
+WireViz requires Python 3.7 or later (3.8 to support pdf).
 
 WireWiz requires GraphViz to be installed in order to work. See the [GraphViz download page](https://graphviz.org/download/) for OS-specific instructions.
 
-_Note_: Ubuntu 18.04 LTS users in particular may need to separately install Python 3.7 or above, as that comes with Python 3.6 as the included system Python install.
+_Note_: Ubuntu 18.04 LTS users in particular may need to separately install Python 3.7 or above, as that comes with Python 3.6 as the included system Python install. The option to generate pdf is not supported for python 3.7, so it might not be possible to use with this version of Ubuntu. If you are forced to use Ubuntu 18.04 for some reason, fill up an issue/MR and I can provide a Docker image to perform the generation.
 
-#### Installing the latest release
+#### Debian Dependencies
+```
+sudo apt install graphviz
+```
 
-The latest WireViz release can be downloaded from [PyPI](https://pypi.org/project/wireviz/) with the following command:
+#### Fedora Dependencies
+```
+sudo dnf install graphviz
+```
+
+#### Pango (only for weasyprint pdf generation)
+
+See https://pango.gnome.org/
+
+
+### Installing the latest release
+
+~~The latest WireViz release can be downloaded from [PyPI](https://pypi.org/project/wireviz/) with the following command:~~
 ```
 pip3 install wireviz
 ```
 
-#### Installing the development version
+Note: The https://github.com/laurierloi/WireViz version sadly can't be downloaded from pypi at
+this time. If you have this need, submit a MR and it could be added under a different name.
 
-Access to the current state of the development branch can be gained by cloning the repo and installing manually:
+### Installing the development version
 
+Access to the current state of the development branch can be gained by cloning the repo and installing manually.
+
+We suggest always installing wireviz within a python virtualenv. This avoids many issues caused by
+dependencies management.
+
+#### Installing wireviz within a virtual env
 ```
-git clone <repo url>
-cd <working copy>
-git checkout dev
-pip3 install -e .
+# Cloning the repository
+git clone git+https://github.com/laurierloi/WireViz
+cd WireViz
+
+# Setup virtualenv
+python3 -m pip install --user virtualenv
+python3 -m virtualenv venv-wireviz
+source venv-wireviz/bin/activate
+
+# Installing/Upgrading dependencies
+pip install -U pip setuptools wheel
+
+# Installing with local modification tracking
+pip install -e .
 ```
 
 If you would like to contribute to this project, make sure you read the [contribution guidelines](CONTRIBUTING.md)!
 
+## Usage
+
 ### How to run
+The latest version of wireviz allows the user to create harness documents.
+To do so, a shared metadata file (or multiple) must be provided to the wireviz command.
+Then, a list of harnesses to include within the document should also be provided.
+In the simplest case, 1 harness can be provided.
 
 ```
-$ wireviz ~/path/to/file/mywire.yml
+$ wireviz -d ~/path/to/file/metadata.yml ~/path/to/file/myharness1.yml ~/path/to/file/myharness2.yml
 ```
 
 Depending on the options specified, this will output some or all of the following files:
 
 ```
-mywire.gv         GraphViz output
-mywire.svg        Wiring diagram as vector image
-mywire.png        Wiring diagram as raster image
-mywire.bom.tsv    BOM (bill of materials) as tab-separated text file
-mywire.html       HTML page with wiring diagram and BOM embedded
+titlepage.html            Titlepage document. It has links to the different harness for easy navigation
+shared_bom.tsv            A BOM (bill of materials) for all items within the harness document
+myharness{1,2}.gv         GraphViz output
+myharness{1,2}.svg        Wiring diagram as vector image
+myharness{1,2}.png        Wiring diagram as raster image
+myharness{1,2}.bom.tsv    BOM (bill of materials) as tab-separated text file
+myharness{1,2}.html       HTML page with wiring diagram and BOM embedded
 ```
 
 Wildcars in the file path are also supported to process multiple files at once, e.g.:
@@ -147,6 +185,15 @@ To see how to specify the output formats, as well as additional options, run:
 ```
 $ wireviz --help
 ```
+
+#### Sample run all examples
+
+```
+$ wireviz -d examples/metadata.yml examples/ex*.yml
+```
+
+Then open `examples/titlepage.html` to open the document root
+
 
 
 ### (Re-)Building the example projects
