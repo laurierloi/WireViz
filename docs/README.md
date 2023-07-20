@@ -70,7 +70,7 @@ connections:
     - W1: s
 ```
 
-Output file:
+Output file: missing
 
 ![Sample output diagram](../examples/demo01.png)
 
