@@ -14,8 +14,8 @@ from wireviz.wv_colors import (
 class PageFormatOptions:
     show_bom: bool = True
     bom_updated_position: str = ""
-    show_index_table: bool = False
-    index_table_on_right: bool = False
+    show_index_table: bool = True
+    index_table_on_right: bool = True
     index_table_updated_position: str = ""
     show_notes: bool = True
     notes_on_right: bool = True
@@ -77,5 +77,3 @@ def get_page_options(parsed_data, page_name: str):
     if page_options_name in parsed_data:
         return PageOptions(**parsed_data[page_options_name])
     return PageOptions(**parsed_data.get('options', {}))
-
-
