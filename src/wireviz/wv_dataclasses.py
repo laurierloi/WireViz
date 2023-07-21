@@ -671,6 +671,7 @@ class Cable(WireClass):
             self.category = BomCategory.BUNDLE
         else:
             self.category = BomCategory.CABLE
+        self.notes = MultilineHypertext.to(self.notes)
 
         # TODO: style management should be separated from this logic...
         self.bgcolor = SingleColor(self.bgcolor)
