@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 import logging
 from dataclasses import dataclass, field
-from typing import Dict, List, Union, Set, Tuple
+from typing import Dict, List, Set, Tuple, Union
 
 import tabulate as tabulate_module
 
 from wireviz.numbers import NumberAndUnit
 from wireviz.partnumber import PartNumberInfo
-from wireviz.wv_utils import remove_links
 from wireviz.wv_templates import get_template
+from wireviz.wv_utils import remove_links
 
 # TODO: different BOM modes
 # BomMode
@@ -18,7 +18,6 @@ from wireviz.wv_templates import get_template
 # "PN crossref" = "PN bubbles" + "hide PN info"
 # "additionally: BOM table in GV graph label (#227)"
 # "title block in GV graph label"
-
 
 
 @dataclass
@@ -107,9 +106,9 @@ class BomEntry:
     def description_str(self):
         description = self.description
         if (
-            not self.restrict_printed_lengths or
-            'href' in description or
-            len(description) < self.MAX_PRINTED_DESCRIPTION
+            not self.restrict_printed_lengths
+            or "href" in description
+            or len(description) < self.MAX_PRINTED_DESCRIPTION
         ):
             return description
         return f"{description[:self.MAX_PRINTED_DESCRIPTION]} (...)"
@@ -170,6 +169,7 @@ class BomEntry:
 
     @property
     def bom_dict_pretty_column(self):
+
         return {self.bom_column(k): v for k, v in self.bom_dict.items()}
 
     def scale_per_harness(self, qty_multipliers):
@@ -192,6 +192,7 @@ class BomEntry:
             qty += info["qty"]
         self.qty = qty
         self.scaled_per_harness = True
+
 
 @dataclass(frozen=True)
 class BomRenderOptions:
@@ -217,8 +218,8 @@ class BomRender:
             headers = [k for k in self.columns if k in self.has_content]
 
         if self.options.no_per_harness:
-            if 'Per Harness' in headers:
-                headers.remove('Per Harness')
+            if "Per Harness" in headers:
+                headers.remove("Per Harness")
         return headers
 
     @property
@@ -232,18 +233,22 @@ class BomRender:
             # sanity check
             expected_length = len(entries_as_list[0])
             for e in entries_as_list:
-                assert len(e) == expected_length, f'entries {e} length is not {expected_length}'
+                assert (
+                    len(e) == expected_length
+                ), f"entries {e} length is not {expected_length}"
 
             if self.options.reverse:
                 entries_as_list.reverse()
 
-            object.__setattr__(self, 'private_content', entries_as_list)
+            object.__setattr__(self, "private_content", entries_as_list)
 
         return self.private_content
 
     @property
     def columns_class(self):
-        return ["bom_col_{}".format("id" if c == "#" else c.lower()) for c in self.headers]
+        return [
+            "bom_col_{}".format("id" if c == "#" else c.lower()) for c in self.headers
+        ]
 
     @property
     def rows(self):
@@ -263,7 +268,7 @@ class BomRender:
         return output
 
     def print_bom_table(self):
-        print('\n', self.as_table(), '\n')
+        print("\n", self.as_table(), "\n")
 
     def render(self, options):
         return get_template("bom.html").render({"bom": self, "options": options})
@@ -271,7 +276,8 @@ class BomRender:
 
 @dataclass
 class BomContent:
-    '''Used to represent the bom'''
+    """Used to represent the bom"""
+
     entries: Dict[str, BomEntry]
 
     def get_bom_render(self, options: Union[BomRenderOptions, None] = None):

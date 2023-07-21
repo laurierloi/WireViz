@@ -89,17 +89,20 @@ def parse(
     connection_sets = []
     # actual harness
     try:
-        metadata=Metadata(**{
+        metadata = Metadata(
             **{
-                "output_name": output_name,
-                "title": yaml_file.stem,
-            },
-            **yaml_data.get("metadata", {}),
-            **extra_metadata,
-
-        })
+                **{
+                    "output_name": output_name,
+                    "title": yaml_file.stem,
+                },
+                **yaml_data.get("metadata", {}),
+                **extra_metadata,
+            }
+        )
     except TypeError:
-        logging.error('Metadata definition is missing an argument, refer to trace for which one\n\tsee src/wirevize/metdata.py for a definition of the metadata fields')
+        logging.error(
+            "Metadata definition is missing an argument, refer to trace for which one\n\tsee src/wirevize/metdata.py for a definition of the metadata fields"
+        )
         raise
 
     harness = Harness(

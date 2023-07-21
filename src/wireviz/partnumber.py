@@ -3,6 +3,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 from wireviz.wv_utils import awg_equiv, mm2_equiv, remove_links
 
+
 # TODO: use frozen dataclass
 @dataclass
 class PartNumberInfo:
@@ -128,6 +129,7 @@ class PartNumberInfo:
 
     def as_list(self, parent_partnumbers=None):
         return partnumbers2list(self, parent_partnumbers)
+
 
 @dataclass
 class PartnumberInfoList:

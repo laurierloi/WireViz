@@ -1,9 +1,9 @@
 import logging
-from dataclasses import dataclass, field, asdict, fields
+from dataclasses import asdict, dataclass, field, fields
 from enum import Enum, IntEnum
+from textwrap import dedent
 from typing import List
 
-from textwrap import dedent
 
 @dataclass
 class Notes:
@@ -18,18 +18,18 @@ class Notes:
 
     def as_html_list(self):
         if self.notes:
-            lines = '\n'.join(f'  <li>{note}</li>' for note in self.notes)
-            return f'<ol>\n{lines}\n</ol>'
-        return ''
+            lines = "\n".join(f"  <li>{note}</li>" for note in self.notes)
+            return f"<ol>\n{lines}\n</ol>"
+        return ""
 
 
 # TODO: nearly same method is within page_options.py, standardize?
 def get_page_notes(parsed_data, page_name: str):
-    '''Get the page options
+    """Get the page options
 
     uses: the page\'s notes   -> general notes -> default notes
         ('{page_name}_notes') ->    ('notes')  -> {}
-    '''
-    page_notes_name = f'{page_name}_notes'
-    notes = parsed_data.get(page_notes_name, parsed_data.get('notes', []))
+    """
+    page_notes_name = f"{page_name}_notes"
+    notes = parsed_data.get(page_notes_name, parsed_data.get("notes", []))
     return Notes(notes=notes)

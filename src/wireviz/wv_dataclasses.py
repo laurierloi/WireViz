@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from dataclasses import dataclass, field, asdict, fields
+from dataclasses import asdict, dataclass, field, fields
 from enum import Enum, IntEnum
 from itertools import zip_longest
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -69,8 +69,8 @@ class PinClass:
     # TODO: support a "crimp" defined by parent
 
     def __post_init__(self):
-        if self.label and '__' in self.label:
-            self.label, pin = self.label.split('__')
+        if self.label and "__" in self.label:
+            self.label, pin = self.label.split("__")
             self.index = int(pin) - 1
 
     def __str__(self):
@@ -84,7 +84,6 @@ class PinClass:
     @property
     def category(self):
         return BomCategory.PIN
-
 
 
 @dataclass
@@ -132,7 +131,6 @@ class Component:
     def __post_init__(self):
         self.qty = NumberAndUnit.to_number_and_unit(self.qty)
         self.amount = NumberAndUnit.to_number_and_unit(self.amount)
-
 
         self.type = MultilineHypertext.to(self.type)
         self.subtype = MultilineHypertext.to(self.subtype)
@@ -255,11 +253,7 @@ class Connector(GraphicalComponent):
         )
 
     def pins_to_show(self):
-        return [
-            p for k, p in self.pin_objects.items()
-            if self.should_show_pin(k)
-        ]
-
+        return [p for k, p in self.pin_objects.items() if self.should_show_pin(k)]
 
     def __post_init__(self) -> None:
         self.category = BomCategory.CONNECTOR
@@ -623,7 +617,9 @@ class Cable(WireClass):
     @property
     def partnumbers(self):
         if self.is_bundle:
-            return PartnumberInfoList(pn_list=[w.partnumbers for w in self.wire_objects.values()])
+            return PartnumberInfoList(
+                pn_list=[w.partnumbers for w in self.wire_objects.values()]
+            )
         else:
             return super().partnumbers
 

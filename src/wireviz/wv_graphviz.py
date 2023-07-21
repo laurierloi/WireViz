@@ -17,8 +17,8 @@ from wireviz.wv_dataclasses import (
     WireClass,
 )
 from wireviz.wv_html import Img, Table, Td, Tr
-from wireviz.wv_utils import html_line_breaks, remove_links
 from wireviz.wv_templates import get_template
+from wireviz.wv_utils import html_line_breaks, remove_links
 
 
 def gv_pin_table(component) -> Table:
@@ -44,6 +44,7 @@ def gv_pin_row(pin, connector) -> Tr:
         Td(pin.id, port=f"p{pin.index+1}r") if connector.ports_right else None,
     ]
     return Tr(cells)
+
 
 def image_and_caption_cells(component: Component) -> (Td, Td):
     if not component.image:
@@ -74,33 +75,35 @@ def image_and_caption_cells(component: Component) -> (Td, Td):
         caption_cell = None
     return (image_cell, caption_cell)
 
+
 def gv_node_connector(connector: Connector) -> Table:
     # TODO: extend connector style support
-    params = { 'component': connector }
-    is_simple_connector = connector.style == 'simple'
+    params = {"component": connector}
+    is_simple_connector = connector.style == "simple"
     template_name = "connector.html"
     if is_simple_connector:
         template_name = "simple-connector.html"
 
     rendered = get_template(template_name).render(params)
-    cleaned_render = '\n'.join([l.rstrip() for l in rendered.split('\n') if l.strip()])
+    cleaned_render = "\n".join([l.rstrip() for l in rendered.split("\n") if l.strip()])
     return cleaned_render
+
 
 def gv_node_cable(cable: Cable) -> Table:
     # REPLACE:
-    #line_ports = gv_conductor_table(component)
+    # line_ports = gv_conductor_table(component)
     line_wires = []
     params = {
-        'component': cable,
-        'line_wires': line_wires,
-        'image': cable.image,
-        'line_notes': html_line_breaks(cable.notes),
-        'additional_components': cable.additional_components,
+        "component": cable,
+        "line_wires": line_wires,
+        "image": cable.image,
+        "line_notes": html_line_breaks(cable.notes),
+        "additional_components": cable.additional_components,
     }
     # TODO: extend cable style support
     template_name = "cable.html"
     rendered = get_template(template_name).render(params)
-    cleaned_render = '\n'.join([l.rstrip() for l in rendered.split('\n') if l.strip()])
+    cleaned_render = "\n".join([l.rstrip() for l in rendered.split("\n") if l.strip()])
     return cleaned_render
 
 
@@ -116,10 +119,12 @@ def gv_node_component(component: Component) -> Table:
 
     line_pn = [l for l in component.partnumbers.as_list()]
     if len(line_pn) > 2:
-        line_pn = [line_pn[0], '(...)', line_pn[-1]]
+        line_pn = [line_pn[0], "(...)", line_pn[-1]]
 
     if isinstance(component, Connector):
-        raise RuntimeError('gv_node_component should not get called for connectors, use "gv_node_connector" instead')
+        raise RuntimeError(
+            'gv_node_component should not get called for connectors, use "gv_node_connector" instead'
+        )
     elif isinstance(component, Cable):
         line_info = [
             html_line_breaks(component.type),

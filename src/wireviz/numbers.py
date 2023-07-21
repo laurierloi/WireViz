@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from math import modf
 from typing import Any, Union
 
+
 @dataclass
 class NumberAndUnit:
     number: float

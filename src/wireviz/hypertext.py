@@ -1,9 +1,11 @@
 from dataclasses import dataclass, field
+
 from wireviz.wv_utils import html_line_breaks
+
 
 @dataclass
 class MultilineHypertext:
-    raw: str    # Hypertext possibly also including newlines to break lines in diagram output
+    raw: str  # Hypertext possibly also including newlines to break lines in diagram output
 
     @staticmethod
     def to(value):
@@ -14,7 +16,7 @@ class MultilineHypertext:
             return MultilineHypertext(raw=value)
 
         if isinstance(value, list):
-            return MultilineHypertext(raw='<br>'.join(value))
+            return MultilineHypertext(raw="<br>".join(value))
 
         return MultilineHypertext("")
 

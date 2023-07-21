@@ -1,22 +1,22 @@
 # -*- coding: utf-8 -*-
 
 import base64
+import logging
 import re
+from dataclasses import asdict, dataclass, field, fields
 from pathlib import Path
 from typing import Dict, List, Union
-from dataclasses import dataclass, field, asdict, fields
-import logging
 
 from weasyprint import HTML
 
 import wireviz  # for doing wireviz.__file__
-from wireviz.wv_bom import BomContent, BomRenderOptions
-from wireviz.wv_harness_quantity import HarnessQuantity
-from wireviz.wv_templates import get_template
+from wireviz.index_table import IndexTable
 from wireviz.metadata import Metadata
 from wireviz.notes import Notes, get_page_notes
 from wireviz.page_options import PageOptions, get_page_options
-from wireviz.index_table import IndexTable
+from wireviz.wv_bom import BomContent, BomRenderOptions
+from wireviz.wv_harness_quantity import HarnessQuantity
+from wireviz.wv_templates import get_template
 
 mime_subtype_replacements = {"jpg": "jpeg", "tif": "tiff"}
 
@@ -68,8 +68,7 @@ def embed_svg_images_file(
 def generate_pdf_output(
     filename_list: List[Path],
 ):
-    """Generate a pdf output
-    """
+    """Generate a pdf output"""
     if isinstance(filename_list, Path):
         filename_list = [filename_list]
         output_path = filename_list[0].with_suffix(".pdf")
@@ -129,7 +128,7 @@ def generate_html_output(
     bom_render_options: BomRenderOptions = None,
 ):
     print("Generating html output")
-    assert metadata and isinstance(metadata, Metadata), 'metadata should be defiend'
+    assert metadata and isinstance(metadata, Metadata), "metadata should be defiend"
     template_name = metadata.template.name
 
     if rendered is None:
@@ -145,7 +144,7 @@ def generate_html_output(
 
     bom_render = BomContent(bom).get_bom_render(options=bom_render_options)
     options.bom_rows = bom_render.rows
-    rendered['bom'] = bom_render.render(options=options)
+    rendered["bom"] = bom_render.render(options=options)
 
     # TODO: instead provide a PageOption to generate or not the svg
     svgdata = None
@@ -176,10 +175,12 @@ def generate_html_output(
         rendered["notes"] = get_template("notes.html").render(replacements)
 
     # generate page template
-    page_rendered = get_template(template_name, ".html").render({
-        **replacements,
-        **rendered,
-    })
+    page_rendered = get_template(template_name, ".html").render(
+        {
+            **replacements,
+            **rendered,
+        }
+    )
 
     # save generated file
     filename.with_suffix(".html").open("w").write(page_rendered)
@@ -206,7 +207,7 @@ def generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=False):
         reverse=False,
     )
 
-    #todo: index table options as a dataclass
+    # todo: index table options as a dataclass
     options = get_page_options(yaml_data, "titlepage")
     options.bom_updated_position = "top: 20mm; left: 10mm"
     options.for_pdf = for_pdf
@@ -217,6 +218,6 @@ def generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=False):
         metadata=metadata,
         options=options,
         notes=get_page_notes(yaml_data, "titlepage"),
-        rendered={'index_table': index_table.render(options)},
+        rendered={"index_table": index_table.render(options)},
         bom_render_options=bom_render_options,
     )

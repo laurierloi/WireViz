@@ -1,9 +1,9 @@
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple, Union
 
-
 from wireviz.hypertext import MultilineHypertext
 from wireviz.wv_colors import SingleColor
+
 
 def aspect_ratio(image_src):
     try:
@@ -17,6 +17,7 @@ def aspect_ratio(image_src):
     except Exception as error:
         print(f"aspect_ratio(): {type(error).__name__}: {error}")
     return 1  # Assume 1:1 when unable to read actual image size
+
 
 @dataclass
 class Image:

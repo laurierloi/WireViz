@@ -7,12 +7,12 @@ from typing import Dict, List
 
 from graphviz import Graph
 
-from wireviz import APP_NAME, APP_URL, __version__
 import wireviz.wv_colors
-from wireviz.wv_bom import BomRenderOptions, BomContent
+from wireviz import APP_NAME, APP_URL, __version__
 from wireviz.metadata import Metadata
-from wireviz.page_options import PageOptions
 from wireviz.notes import Notes
+from wireviz.page_options import PageOptions
+from wireviz.wv_bom import BomContent, BomRenderOptions
 from wireviz.wv_dataclasses import (
     Arrow,
     ArrowWeight,
@@ -29,8 +29,8 @@ from wireviz.wv_graphviz import (
     gv_connector_loops,
     gv_edge_mate,
     gv_edge_wire,
-    gv_node_connector,
     gv_node_component,
+    gv_node_connector,
     parse_arrow_str,
     set_dot_basics,
 )
@@ -40,7 +40,6 @@ from wireviz.wv_output import (
     generate_pdf_output,
 )
 from wireviz.wv_templates import get_template
-
 
 
 @dataclass
@@ -200,13 +199,13 @@ class Harness:
         to_pin: (int, str),
     ) -> None:
         def clean_pin(pin):
-            '''Allow for a pin of the form "PINLABEL__PINNUMBER"
+            """Allow for a pin of the form "PINLABEL__PINNUMBER"
 
             This is a bit treacherous, because we actually allow PINNUMBER which are not int.
             When this happens, the pinnumber will be considered as a pinlabel.
             The logic below should handle that case
 
-            '''
+            """
             pinlabel = None
             pinnumber = None
             if isinstance(pin, str):
@@ -223,7 +222,9 @@ class Harness:
             return pinlabel, pinnumber
 
         # check from and to connectors
-        for (name, (pinlabel, pinnumber)) in zip([from_name, to_name], [clean_pin(from_pin), clean_pin(to_pin)]):
+        for (name, (pinlabel, pinnumber)) in zip(
+            [from_name, to_name], [clean_pin(from_pin), clean_pin(to_pin)]
+        ):
             if name is None or name not in self.connectors:
                 continue
 
@@ -233,38 +234,50 @@ class Harness:
             pinnumber_index = None
 
             if pinlabel is not None:
-                pinlabel_indexes = [i for i, x in enumerate(connector.pinlabels) if x == pinlabel]
+                pinlabel_indexes = [
+                    i for i, x in enumerate(connector.pinlabels) if x == pinlabel
+                ]
                 if len(pinlabel_indexes) == 0:
                     pinlabel_indexes = None
                     if pinlabel in connector.pins:
                         pinnumber = pinlabel
                     else:
-                        raise ValueError(f"Pinlabel {pinlabel} is not in pinlabels of connector {name}")
+                        raise ValueError(
+                            f"Pinlabel {pinlabel} is not in pinlabels of connector {name}"
+                        )
 
             if pinnumber is not None:
-                pinnumber_indexes = [i for i, x in enumerate(connector.pins) if x == pinnumber]
+                pinnumber_indexes = [
+                    i for i, x in enumerate(connector.pins) if x == pinnumber
+                ]
                 if len(pinnumber_indexes) > 1:
-                    raise ValueError(f"Pinnumber {pinnumber} is not unique in pins of connector {name}")
+                    raise ValueError(
+                        f"Pinnumber {pinnumber} is not unique in pins of connector {name}"
+                    )
                 pinnumber_index = pinnumber_indexes[0]
                 if pinlabel_indexes is not None:
                     if pinnumber_index not in pinlabel_indexes:
-                        raise ValueError(f"No pinnumber {pinnumber} matches pinlabel {pinlabel} in connector {name}, pinlabel for that pinnumber is {connector.pinlabels[pinnumber_index]}")
+                        raise ValueError(
+                            f"No pinnumber {pinnumber} matches pinlabel {pinlabel} in connector {name}, pinlabel for that pinnumber is {connector.pinlabels[pinnumber_index]}"
+                        )
             elif pinlabel_indexes is not None:
                 if len(pinlabel_indexes) > 1:
                     pinnumber_indexes = [connector.pins[i] for i in pinlabel_indexes]
-                    raise ValueError(f"Pinlabel {pinlabel} is not unique in pinlabels of connector {name} (available pins are: {pinnumber_indexes}), and no pinnumber defined to disambiguate\nThe user can define a pinnumber by using the form PINLABEL__PINNUMBER, where the double underscore is the separator")
+                    raise ValueError(
+                        f"Pinlabel {pinlabel} is not unique in pinlabels of connector {name} (available pins are: {pinnumber_indexes}), and no pinnumber defined to disambiguate\nThe user can define a pinnumber by using the form PINLABEL__PINNUMBER, where the double underscore is the separator"
+                    )
                 pinnumber_index = pinlabel_indexes[0]
 
-
             if pinnumber_index is None:
-                raise ValueError(f"Neither pinlabel ({pinlabel}) or pinnumber ({pinnumber}) where found on connector {name}, pinlabels: {connector.pinlabels}, pinnumbers: {connector.pins})")
+                raise ValueError(
+                    f"Neither pinlabel ({pinlabel}) or pinnumber ({pinnumber}) where found on connector {name}, pinlabels: {connector.pinlabels}, pinnumbers: {connector.pins})"
+                )
 
             pin = connector.pins[pinnumber_index]
             if name == from_name:
                 from_pin = pin
             if name == to_name:
                 to_pin = pin
-
 
         # check via cable
         if via_name in self.cables:
@@ -309,7 +322,9 @@ class Harness:
         try:
             self.cables[via_name]._connect(from_pin_obj, via_wire, to_pin_obj)
         except Exception as e:
-            logging.warning(f'fail to connect cable {via_name}, from_pin: {from_pin}, via_wire: {via_wire}, to_pin: {to_pin}\n\texception:{e}')
+            logging.warning(
+                f"fail to connect cable {via_name}, from_pin: {from_pin}, via_wire: {via_wire}, to_pin: {to_pin}\n\texception:{e}"
+            )
             raise
         if from_name in self.connectors:
             self.connectors[from_name].activate_pin(from_pin, Side.RIGHT)
@@ -443,7 +458,9 @@ class Harness:
             print("CSV output is not yet supported")
         # HTML output
         if "html" in fmt:
-            generate_html_output(filename, self.bom, self.metadata, self.options, self.notes)
+            generate_html_output(
+                filename, self.bom, self.metadata, self.options, self.notes
+            )
         # PDF output
         if "pdf" in fmt:
             generate_pdf_output(filename)

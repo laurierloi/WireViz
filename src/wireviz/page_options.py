@@ -1,13 +1,11 @@
 import logging
-from dataclasses import dataclass, field, asdict, fields
+from dataclasses import asdict, dataclass, field, fields
 from enum import Enum, IntEnum
 from typing import Any, Dict, List, Optional, Tuple, Union
 
+from wireviz.wv_colors import ColorOutputMode, SingleColor
+
 from .wv_dataclasses import PlainText
-from wireviz.wv_colors import (
-    ColorOutputMode,
-    SingleColor,
-)
 
 
 @dataclass
@@ -49,6 +47,7 @@ class ComponentDimensions:
     titleblock_row_height: float = 4.25
     index_table_row_height: float = 4.25
 
+
 # TODO: custom options for TitlePage, BOMPage, NotesPage, HarnessPage?
 # TODO: have options tree instead of unwrapping?
 @dataclass
@@ -68,12 +67,12 @@ class PageOptions(ComponentDimensions, PageFormatOptions, DiagramColorOpions):
 
 
 def get_page_options(parsed_data, page_name: str):
-    '''Get the page options
+    """Get the page options
 
     uses: the page\'s options   -> general options -> default options
         ('{page_name}_options') ->    ('options')  -> {}
-    '''
-    page_options_name = f'{page_name}_options'
+    """
+    page_options_name = f"{page_name}_options"
     if page_options_name in parsed_data:
         return PageOptions(**parsed_data[page_options_name])
-    return PageOptions(**parsed_data.get('options', {}))
+    return PageOptions(**parsed_data.get("options", {}))

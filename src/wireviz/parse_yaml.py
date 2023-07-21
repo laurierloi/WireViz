@@ -1,9 +1,11 @@
-'''Parse yaml files while supporting updates (newer files modify previous definitions)'''
+"""Parse yaml files while supporting updates (newer files modify previous definitions)"""
 
-import yaml
 from functools import reduce
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any, Dict, List
+
+import yaml
+
 
 def merge_item(x, y):
     if y is None:
@@ -24,17 +26,19 @@ def merge_item(x, y):
                 elif k in y:
                     new_dict[k] = y[k]
                 else:
-                    raise RuntimeError(f'Key {k} not in x or y, this should never happen!')
+                    raise RuntimeError(
+                        f"Key {k} not in x or y, this should never happen!"
+                    )
             ret = new_dict
         elif isinstance(x, list):
             ret = x + y
-        else:   # y dominates
+        else:  # y dominates
             ret = y
     return ret
 
 
 def merge_content(content: List[Dict[str, Any]]) -> Dict[str, Any]:
-    '''Merge content'''
+    """Merge content"""
     return reduce(merge_item, content)
 
 
@@ -46,11 +50,14 @@ def parse_merge_files(files: List[Path]) -> Dict[str, Any]:
     content = []
     return parse_merge_yaml([f.open("r").read() for f in files])
 
+
 def parse_concat_merge_files(concats: List[Path], merge: List[Path]) -> Dict[str, Any]:
-    return parse_merge_yaml([
-        '\n'.join([f.open("r").read() for f in concats]),
-        *[f.open("r").read() for f in merge],
-    ])
+    return parse_merge_yaml(
+        [
+            "\n".join([f.open("r").read() for f in concats]),
+            *[f.open("r").read() for f in merge],
+        ]
+    )
 
 
 if __name__ == "__main__":
@@ -95,29 +102,29 @@ notes:
     """
 
     expected = {
-        'metadata': {
-            'company': 'super cool',
-            'pn': 'test-02',
-            'authors': {
-                'created': {
-                    'name': 'bob ross',
-                    'date': '2023-04-10',
+        "metadata": {
+            "company": "super cool",
+            "pn": "test-02",
+            "authors": {
+                "created": {
+                    "name": "bob ross",
+                    "date": "2023-04-10",
                 },
-                'reviewed': {
-                    'name': 'Pablo Picasso',
-                    'date': '2023-04-11',
+                "reviewed": {
+                    "name": "Pablo Picasso",
+                    "date": "2023-04-11",
                 },
             },
         },
-        'notes': [
-            'some note 1',
-            'some note 2',
-            'some note 3',
-            'more note 4',
-            'more note 5',
-            'even more note 6',
-            'so much note 7',
-        ]
+        "notes": [
+            "some note 1",
+            "some note 2",
+            "some note 3",
+            "more note 4",
+            "more note 5",
+            "even more note 6",
+            "so much note 7",
+        ],
     }
     parsed = parse_merge_yaml([data1, data2, data3])
     symmetric_diff = set(parsed) ^ set(expected)
