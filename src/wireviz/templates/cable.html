@@ -2,16 +2,18 @@
 {% extends "component_table.html" %}
 
 {% block header_extra_col %}
+{# undefied 'bom_id', tbd where/how it is needed
   {% if bom_id %}
   <td> BOM: {{ bom_id }} </td>
   {% endif %}
+#}
 {% endblock %}
 
 {% block info_columns %}
 {% if component.type %}<td> {{ component.type }} </td> {% endif %}
   {% if component.show_wirecount %} <td > {{ component.wirecount }}x </td> {% endif %}
   {% if component.gauge_str_with_equiv %} <td> {{ component.gauge_str_with_equiv }} </td> {% endif %}
-  {% if component.shield %} <td> "+ S" </td> {% endif %}
+  {% if component.shield %} <td> + S </td> {% endif %}
   <td> {{ component.length_str }} </td>
   {% if component.color %} <td> {{ component.color }} </td> {% endif %}
   {% if component.color %} {{ colors.colorbar_cells(component.color, component.color.len) }} {% endif %}
@@ -38,7 +40,23 @@
 	  </tr>
 	  <!-- Cable Drawing -->
 	  <tr>
-          <td border="0" cellspacing="0" colspan="5" height="2" port="{{ wire.port }}" > </td>
+          <td border="0" cellspacing="0" cellpadding="0" colspan="5" height="2" port="{{ wire.port }}">
+              <table  border="0" cellborder="0" cellspacing="0">
+                  <tr>
+                      <td bgcolor="#000000" border="0" cellpadding="0" colspan="5" height="2"></td>
+                  </tr>
+                  <tr>
+                      {% if wire.color.html %}
+                      <td bgcolor="{{ wire.color.html_padded }}" border="0" cellpadding="0" colspan="5" height="2"></td>
+                      {% else %}
+                      <td bgcolor="#000000" border="0" cellpadding="0" colspan="5" height="2"></td>
+                      {% endif %}
+                  </tr>
+                  <tr>
+                      <td bgcolor="#000000" border="0" cellpadding="0" colspan="5" height="2"></td>
+                  </tr>
+              </table>
+          </td>
 	  </tr>
 	  <!-- Cable Bottom -->
        <!--
