@@ -8,15 +8,14 @@
       <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
         <tr>
           <td port="p1l"> {{ component.type }} </td>
-          {% if component.subtype %} <td > {{ component.subtype }} </td> {% endif %}
+          {% if not component.subtype.is_empty() %} <td > {{ component.subtype.clean }} </td> {% endif %}
           {% if component.show_pincount %} <td> {{ component.pincount }}-pin </td> {% endif %}
-          {% if component.color %} 
+          {% if component.color %}
             <td > {{ component.color }} </td>
-            {{ colors.colorbar_cells(component.color, component.color.len, "p1r") }} 
+            {{ colors.colorbar_cells(component.color, component.color.len, "p1r") }}
           {% endif %}
         </tr>
       </table>
     </td>
   </tr>
 </table>
-
