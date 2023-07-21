@@ -14,7 +14,7 @@
   {% if component.show_wirecount %} <td > {{ component.wirecount }}x </td> {% endif %}
   {% if component.gauge_str_with_equiv %} <td> {{ component.gauge_str_with_equiv }} </td> {% endif %}
   {% if component.shield %} <td> + S </td> {% endif %}
-  <td> {{ component.length_str }} </td>
+  {% if component.length_str %} <td> {{ component.length_str }} </td> {% endif %}
   {% if component.color %} <td> {{ component.color }} </td> {% endif %}
   {% if component.color %} {{ colors.colorbar_cells(component.color, component.color.len) }} {% endif %}
 {% endblock %}
