@@ -6,6 +6,8 @@ from pathlib import Path
 from typing import Dict, List, Union
 from dataclasses import dataclass, field, asdict, fields
 import logging
+import xlsxwriter
+from collections import OrderedDict
 
 from weasyprint import HTML
 
@@ -94,8 +96,8 @@ def generate_shared_bom(
     multiplier_file_name=None,
 ):
     shared_bom_base = output_dir / "shared_bom"
-    shared_bom_file = shared_bom_base.with_suffix(".tsv")
-    print(f"Generating shared bom at {shared_bom_base}")
+    shared_bom_file = shared_bom_base.with_suffix(".xlsx")
+    print(f'Generating shared bom {shared_bom_base}')
 
     if use_qty_multipliers:
         harnesses = HarnessQuantity(files, multiplier_file_name, output_dir=output_dir)
@@ -112,11 +114,7 @@ def generate_shared_bom(
             reverse=False,
         )
     )
-
-    shared_bom_file.open("w").write(bom_render.as_tsv())
-
-    return shared_bom_base
-
+    generate_xlsx_output(shared_bom_file, bom_render)
 
 # TODO: should define the dataclass needed to avoid doing any dict shuffling in here
 def generate_html_output(
@@ -220,3 +218,35 @@ def generate_titlepage(yaml_data, extra_metadata, shared_bom, for_pdf=False):
         rendered={'index_table': index_table.render(options)},
         bom_render_options=bom_render_options,
     )
+
+
+def generate_xlsx_output(filename, inp, header=None):
+    print('Generating xlsx output')
+    workbook = xlsxwriter.Workbook(filename)
+    worksheet = workbook.add_worksheet()
+
+    populate_spreadsheet_header_row(worksheet, get_xlsx_row_ordered_dict(inp.entries[0]))
+    for row_idx, line_item in enumerate(inp.entries):
+        line_item = get_xlsx_row_ordered_dict(line_item)
+        for field in line_item:
+            worksheet.write(row_idx+1, list(line_item.keys()).index(field), line_item[field])
+
+        qty_to_buy_formula = f'= INDIRECT(Address({row_idx+1}, {get_excel_col_idx(line_item, "Qty")})) + INDIRECT(Address({row_idx+1}, {get_excel_col_idx(line_item, "Qty Extras Desired")})) - INDIRECT(Address({row_idx+1}, {get_excel_col_idx(line_item, "Qty Inventory")}))'#+1 because title row
+        worksheet.write_formula(row_idx+1, get_excel_col_idx(line_item, 'Qty to Buy'), qty_to_buy_formula)# how to eliminate assumption that qty to buy is last field?
+    workbook.close()
+
+def get_excel_col_idx(input_row, col_name):
+    return list(input_row.keys()).index(col_name) + 1
+
+def populate_spreadsheet_header_row(worksheet, line_item):
+    for idx, key in enumerate(line_item):
+        worksheet.write(0, idx, key)
+
+extra_fields = {'Qty Inventory': '0',
+                'Qty Extras Desired': '0',
+                'Qty to Buy': '0'}
+
+def get_xlsx_row_ordered_dict(input_row_dict):
+    row = OrderedDict(input_row_dict)
+    row.update(extra_fields)
+    return row
