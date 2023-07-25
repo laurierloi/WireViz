@@ -50,15 +50,8 @@ def gv_node_cable(cable: Cable) -> Table:
     #            )
     #            rows.append(Tr(Td(table_below, colspan=len(cells_above))))
     # TODO: support multicolor cables
-    line_wires = []
-    params = {
-        "component": cable,
-        "line_wires": line_wires,
-        "image": cable.image,
-        "line_notes": html_line_breaks(cable.notes),
-        "additional_components": cable.additional_components,
-    }
     # TODO: extend cable style support
+    params = {"component": cable}
     template_name = "cable.html"
     rendered = get_template(template_name).render(params)
     cleaned_render = "\n".join([l.rstrip() for l in rendered.split("\n") if l.strip()])
