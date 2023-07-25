@@ -13,13 +13,7 @@ from wireviz.metadata import Metadata
 from wireviz.notes import Notes
 from wireviz.page_options import PageOptions
 from wireviz.wv_bom import BomContent, BomRenderOptions
-from wireviz.wv_dataclasses import (
-    BomCategory,
-    Cable,
-    Component,
-    Connector,
-    Side,
-)
+from wireviz.wv_dataclasses import BomCategory, Cable, Component, Connector, Side
 from wireviz.wv_graphviz import (
     gv_connector_loops,
     gv_edge_wire,
@@ -342,7 +336,7 @@ class Harness:
             # generate cable node
             template_html = gv_node_cable(cable)
             # For debugging:
-            #print('\n'.join([f'l. {idx:03}: {line}' for idx, line in enumerate(template_html.split('\n'))]))
+            # print('\n'.join([f'l. {idx:03}: {line}' for idx, line in enumerate(template_html.split('\n'))]))
             style = "filled,dashed" if cable.category == "bundle" else "filled"
             dot.node(
                 cable.designator,

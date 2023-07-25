@@ -5,13 +5,7 @@ from typing import Any, List, Optional, Union
 
 from wireviz import APP_NAME, APP_URL, __version__
 from wireviz.wv_colors import MultiColor, SingleColor
-from wireviz.wv_dataclasses import (
-    Cable,
-    Component,
-    Connector,
-    ShieldClass,
-    WireClass,
-)
+from wireviz.wv_dataclasses import Cable, Component, Connector, ShieldClass, WireClass
 from wireviz.wv_html import Img, Table, Td, Tr
 from wireviz.wv_templates import get_template
 from wireviz.wv_utils import html_line_breaks, remove_links
@@ -96,7 +90,7 @@ def set_dot_basics(dot, options):
     dot.attr(
         "graph",
         rankdir="LR",
-        ranksep="3", # TODO: make conditional on the number of components/connections
+        ranksep="3",  # TODO: make conditional on the number of components/connections
         bgcolor=options.bgcolor.html,
         nodesep="0.33",
         fontname=options.fontname,

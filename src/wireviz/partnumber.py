@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
-from typing import Any, Dict, List, Optional, Tuple, Union
 from functools import reduce
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 from wireviz.wv_utils import awg_equiv, mm2_equiv, remove_links
 
@@ -187,7 +187,8 @@ class PartnumberInfoList:
 
 
 def partnumbers2list(
-    partnumbers: PartNumberInfo, parent_partnumbers: Union[PartNumberInfo, PartnumberInfoList, None] = None
+    partnumbers: PartNumberInfo,
+    parent_partnumbers: Union[PartNumberInfo, PartnumberInfoList, None] = None,
 ) -> List[str]:
     if not isinstance(partnumbers, list):
         partnumbers = [partnumbers]

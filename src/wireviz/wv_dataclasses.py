@@ -413,11 +413,11 @@ class WireClass(GraphicalComponent):
             wireinfo.append(str(self.color))
         if self.label:
             wireinfo.append(self.label)
-        return ':'.join(wireinfo)
+        return ":".join(wireinfo)
 
     @property
     def port(self):
-        return f'w{self.index+1}'
+        return f"w{self.index+1}"
 
     @property
     def partnumbers(self):
@@ -800,21 +800,23 @@ class Cable(WireClass):
 
     def wire_ins(self, wire_id):
         return [
-            str(c.from_) for c in self._connections
+            str(c.from_)
+            for c in self._connections
             if c.via.id == wire_id and c.from_ is not None
         ]
 
     def wire_ins_str(self, wire_id):
-        return ', '.join(self.wire_ins(wire_id))
+        return ", ".join(self.wire_ins(wire_id))
 
     def wire_outs(self, wire_id):
         return [
-            str(c.to) for c in self._connections
+            str(c.to)
+            for c in self._connections
             if c.via.id == wire_id and c.to is not None
         ]
 
     def wire_outs_str(self, wire_id):
-        return ', '.join(self.wire_outs(wire_id))
+        return ", ".join(self.wire_outs(wire_id))
 
     def compute_qty_multipliers(self):
         # do not run before all connections in harness have been made!
