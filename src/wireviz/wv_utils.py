@@ -109,21 +109,6 @@ def clean_whitespace(inp):
     return " ".join(inp.split()).replace(" ,", ",") if isinstance(inp, str) else inp
 
 
-def is_arrow(inp):
-    """
-    Matches strings of one or multiple `-` or `=` (but not mixed)
-    optionally starting with `<` and/or ending with `>`.
-
-    Examples:
-      <-, --, ->, <->
-      <==, ==, ==>, <=>
-    """
-    # regex by @shiraneyo
-    return bool(
-        re.match(r"^\s*(?P<leftHead><?)(?P<body>-+|=+)(?P<rightHead>>?)\s*$", inp)
-    )
-
-
 def smart_file_resolve(filename: Path, possible_paths: (Path, List[Path])) -> Path:
     if isinstance(possible_paths, Path) or isinstance(possible_paths, str):
         possible_paths = [possible_paths]

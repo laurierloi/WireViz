@@ -26,3 +26,6 @@ class MultilineHypertext:
 
     def __repr__(self):
         return self.raw
+
+    def is_empty(self):
+        return not self.raw

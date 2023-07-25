@@ -6,7 +6,7 @@
 
 {% block info_columns %}
   <td> {{ component.type.clean }} </td>
-  <td> {{ component.subtype.clean }} </td>
+  {% if not component.subtype.is_empty() %} <td > {{ component.subtype.clean }} </td> {% endif %}
   {% if component.show_pincount %} <td > {{ component.pincount }}-pin </td> {% endif %}
   {% if component.color %}
       <td > {{ component.color }} </td>
@@ -14,7 +14,8 @@
   {% endif %}
 {% endblock %}
 
-{% block port_rows %}
+{% block ports %}
+  <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
   {% for pin in component.pins_to_show()  %}
     <tr>
       {% if component.ports_left %}  <td port="p{{ pin.index + 1 }}l"> {{ pin.id }} </td> {% endif %}
@@ -26,4 +27,5 @@
       {% if component.ports_right %} <td port="p{{ pin.index + 1 }}r"> {{ pin.id }} </td> {% endif %}
     </tr>
   {% endfor %}
+  </table>
 {% endblock %}

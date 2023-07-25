@@ -43,11 +43,11 @@ options:  # dictionary of common attributes for the whole harness
 ```yaml
 <str>   :  # unique connector designator/name
   # general information about a connector (all optional)
-  type: <str>   
-  subtype: <str>   
+  type: <str>
+  subtype: <str>
   color: <color>  # see below
   image: <image>  # see below
-  notes: <str>   
+  notes: <str>
 
   # product information (all optional)
   ignore_in_bom: <bool>  # if set to true the connector is not added to the BOM
@@ -94,7 +94,7 @@ options:  # dictionary of common attributes for the whole harness
                         # generates one BOM item for every wire in the bundle
                         # instead of a single item for the entire cable;
                         # renders with a dashed outline
-  type: <str>   
+  type: <str>
   gauge: <int/float/str>  # allowed formats:
                           # <int/float> mm2  is understood
                           # <int> AWG        is understood
@@ -114,7 +114,7 @@ options:  # dictionary of common attributes for the whole harness
                         # A shield can be accessed by using 's' as the wire ID
   color: <color>  # see below
   image: <image>  # see below
-  notes: <str>   
+  notes: <str>
 
   # product information (all optional)
   ignore_in_bom: <bool>  # if set to true the cable or wires are not added to the BOM
@@ -156,7 +156,6 @@ connections:
   -                # Each list entry is a connection set
     - <component>    # Each connection set is itself a list of items
     - <component>    # Items must alternatingly belong to the connectors and cables sections
-                     # Arrows may be used instead of cables
     -...
 
   - # example (single connection)
@@ -173,19 +172,6 @@ connections:
     - [<connector>, ..., <connector>]     # specify multiple simple connectors to attach in parallel
                                           # these may be unique, auto-generated, or a mix of both
 
-  - # example (arrows between pins)
-    - <connector>: [<pin>, ..., <pin>]
-    - [<arrow>, ..., <arrow>]             # draw arrow linking pins of both connectors
-                                          # use single line arrows (--, <--, <-->, -->)
-    - <connector>: [<pin>, ..., <pin>]
-
-  - # example (arrows between connectors)
-    - <connector>                  
-    - <arrow>                               # draw arrow linking the connectors themselves
-                                            # use double line arrow (==, <==, <==>, ==>)
-    - <connector>
-
-  ...    
 ```
 
 - Each connection set is a list of components.
@@ -195,13 +181,12 @@ connections:
 - When a connection set defines multiple parallel connections, the number of specified `<pin>`s and `<wire>`s for each component in the set must match. When specifying only one designator, one is auto-generated for each connection of the set.
 - `<pin>` may reference a pin's unique ID (as per the connector's `pins` attribute, auto-numbered from 1 by default) or its label (as per `pinlabels`).
 - `<wire>` may reference a wire's number within a cable/bundle, its label (as per `wirelabels`) or, if unambiguous, its color.
-- For `<arrow>`, see below.
 
 ### Single connections
 
 #### Connectors
 
-- `- <designator>: <int/str>` attaches a pin of the connector, referring to a pin number (from the connector's `pins` attribute) or a pin label (from its `pinlabels` attribute), provided the label is unique.
+- `- <designator>: <int/str>, <str>__<int>` attaches a pin of the connector, referring to a pin number (from the connector's `pins` attribute) or a pin label (from its `pinlabels` attribute), provided the label is unique.
 
 - `- <designator>` is allowed for simple connectors, since they have only one pin to connect.
 For connectors with `autogenerate: true`, a new instance, with auto-generated designator, is created.
@@ -221,6 +206,8 @@ For connectors with `autogenerate: true`, a new instance, with auto-generated de
   - `<int/str>` to refer to a specific pin, using its number (from its `pins` attribute) or its label (from its `pinlabels` attribute, provided the label is unique for this connector)
 
   - `<int>-<int>` auto-expands to a range, e.g. `1-4` auto-expands to `1,2,3,4`; `9-7` will auto-expand to `9,8,7`.
+  - <str>__<int> where str is the name of the pin and int is it's number. This can be used to
+	  differentiate pins which have the same label (i.e. GND)
 
   - Mixing types is allowed, e.g. `[<pin>, <pinlabel>, <pin>-<pin>, <pin>]`
 
@@ -246,94 +233,14 @@ For connectors with `autogenerate: true`, a new instance, with auto-generated de
   - `<int>-<int>` auto-expands to a range.
   - `<str>` to refer to a wire's label or color, if unambiguous.
 
-### Arrows
-
-Arrows may be used in place of wires to join two connectors. This can represent the mating of matching connectors.
-
-To represent joining individual pins between two connectors, a list of single arrows is used:
-```yaml
-connections:
-  -
-    - <connector>: [<pin>,...,<pin>]
-    - [<arrow>, ..., <arrow>]         # --, <--, <--> or -->
-    - <connector>: [<pin>,...,<pin>]
 ```
-
-To represent mating of two connectors as a whole, one double arrow is used:
-```yaml
-connections:
-  -
-    - <connector>  # using connector designator only
-    - <arrow>      # ==, <==, <==> or ==>
-    - <connector>
-  -
-    - ...
-    - <connector>: [<pin>, ...]  # designator and pinlist (pinlist is ignored)
-                                 # useful when combining arrows and wires
-    - <arrow>                    # ==, <==, <==> or ==>
-    - <connector>: [<pin>, ...]
-    - ...
-```
-
-### Autogeneration of items
-
-For very simple, recurring connectors such as crimp ferrules, splices and others, where it would be a hassle to individually assign unique designators for every instance, autogeneration may be used. Both connectors and cables can be autogenerated.
-
-Example (see `connections` section):
-
-```yaml
-connectors:
-  X:
-    # ...
-  Y:
-    # ...
-  Z:
-    style: simple
-    # ...
-cables:
-  V:
-    # ...
-  W:
-    # ...
-
-connections:
-  -  # no autogeneration (normal use)
-    - X: [1,2,...]  # Use X as both the template and the instance designator
-    - V: [1,2,...]  # Use V as both the template and the instance designator
-    # ...
-
-  -  # autogeneration of named instances
-    - Y.Y1: [1,2,...]  # Use template Y, generate instance with designator Y1
-    - W.W1: [1,2,...]  # Use template W, generate instance with designator W1
-    - Y.Y2: [1,2,...]  # generate more instances from the same templates
-    - W.W2: [1,2,...]
-    - Y.Y3: [1,2,...]  
-
-  -  # autogeneration of unnamed instances
-    - Y3:   [1,2,...]  # reuse existing instance Y3
-    - W.W4: [1,2,...]
-    - Z.             # Use template Z, generate one unnamed instance
-                     # for each connection in set
-```
-
-Since the internally assigned designator of an unnamed component is not known to the user, one instance of the connector can not be referenced again outside the point of creation (i.e. in other connection sets, or later in the same set). Autogeneration of unnamed instances is therefore only useful for terminals with only one wire attached, or splices with exactly one wire going in, and one wire going out.
-If a component is to be used in other connection sets (e.g. for a three-way splice, or a crimp where multiple wires are joined), a named instance needs to be used.
-
-Names of autogenerated components are hidden by default. While they can be shown in the graphical output using the `show_name: true` option, it is not recommended to manually use the internally assigned designator (starting with a double underscore `__`), since it might change in future WireViz versions, or when the order of items in connection sets changes.
-
-
 ## Metadata entries
 
 ```yaml
   # Meta-information describing the harness
 
-  # Each key/value pair replaces all key references in
-  # the HTML output template with the belonging value.
-  # Typical keys are 'title', 'description', and 'notes',
-  # but any key is accepted. Unused keys are ignored.
-  <key>   : <value>  # Any valid YAML syntax is accepted
-  # If no value is specified for 'title', then the
-  # output filename without extension is used.
+  # Valus supported can be found in src/wireviz/metadata.py
+
 ```
 
 ## Options
@@ -397,9 +304,9 @@ Parts can be added to a connector or cable in the section `<additional-component
                   # total_length     sum of lengths of each wire in the bundle
   unit: <str>
   pn: <str>            # [internal] part number
-  manufacturer: <str>  # manufacturer name  
+  manufacturer: <str>  # manufacturer name
   mpn: <str>           # manufacturer part number
-  supplier: <str>      # supplier name  
+  supplier: <str>      # supplier name
   spn: <str>           # supplier part number
   bgcolor: <color>     # Background color of entry in diagram component box
 ```
@@ -408,15 +315,15 @@ Alternatively items can be added to just the BOM by putting them in the section 
 
 ```yaml
 -
-  description: <str>              
+  description: <str>
   # all the following are optional:
   qty: <int/float>  # qty to add to the bom (defaults to 1)
-  unit: <str>   
+  unit: <str>
   designators: <List>
   pn: <str>            # [internal] part number
-  manufacturer: <str>  # manufacturer name  
+  manufacturer: <str>  # manufacturer name
   mpn: <str>           # manufacturer part number
-  supplier: <str>      # supplier name  
+  supplier: <str>      # supplier name
   spn: <str>           # supplier part number
 ```
 

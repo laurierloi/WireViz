@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from functools import reduce
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 from wireviz.wv_utils import awg_equiv, mm2_equiv, remove_links
@@ -71,12 +72,16 @@ class PartNumberInfo:
                 l[1] = "MPN"
             l[1] += ": "
             l[1] += self.mpn
+        elif l[1]:
+            l[1] = "Manufacturer: " + l[1]
         l[2] = self.supplier
         if self.spn:
             if not l[2]:
                 l[2] = "SPN"
             l[2] += ": "
             l[2] += self.spn
+        elif l[2]:
+            l[2] = "Supplier: " + l[2]
         return [i for i in l if i]
 
     def copy(self):
@@ -136,6 +141,17 @@ class PartnumberInfoList:
     pn_list: List[PartNumberInfo] = field(default_factory=list())
     is_list: bool = True
 
+    def keep_only_shared(self):
+        uniques = set(tuple(self.pn_list))
+        if not uniques:
+            return
+
+        shared = reduce(lambda x, y: x.keep_only_eq(y), uniques)
+        return shared
+
+    def as_unique_list(self):
+        return list(set(tuple(self.pn_list)))
+
     def keep_only_eq(self, other):
         for pn in self.pn_list:
             yield pn.keep_only_eq(other)
@@ -144,13 +160,35 @@ class PartnumberInfoList:
         for pn in self.pn_list:
             yield pn.remove_eq(other)
 
+    def keep_unique(self, other):
+        kept = []
+        for pn_1 in self.pn_list:
+            for pn_2 in self.pn_list:
+                if pn_1 == pn_2:
+                    continue
+                eq = pn_1.keep_only_eq(pn_2)
+                if eq:
+                    kept.append(eq)
+        if not kept:
+            shared = self.keep_only_shared()
+            if shared:
+                for pn in other:
+                    yield pn.remove_eq(shared)
+            else:
+                yield from other
+        else:
+            shared = reduce(lambda x, y: x.keep_only_eq(y), kept)
+            for pn in other:
+                yield pn.remove_eq(shared)
+
     def as_list(self, parent_partnumbers=None):
         for pn in self.pn_list:
             yield pn.as_list()
 
 
 def partnumbers2list(
-    partnumbers: PartNumberInfo, parent_partnumbers: PartNumberInfo = None
+    partnumbers: PartNumberInfo,
+    parent_partnumbers: Union[PartNumberInfo, PartnumberInfoList, None] = None,
 ) -> List[str]:
     if not isinstance(partnumbers, list):
         partnumbers = [partnumbers]
@@ -159,9 +197,9 @@ def partnumbers2list(
     if parent_partnumbers is None:
         return PartNumberInfo.list_keep_only_eq(partnumbers).str_list
 
-    if isinstance(parent_partnumbers, list):
-        parent_partnumbers = PartNumberInfo.list_keep_only_eq(parent_partnumbers)
-
-    partnumbers = [p.remove_eq(parent_partnumbers) for p in partnumbers]
+    if parent_partnumbers is not None:
+        if isinstance(parent_partnumbers, PartNumberInfo):
+            parent_partnumbers = PartnumberInfoList([parent_partnumbers])
+    partnumbers = parent_partnumbers.keep_unique(partnumbers)
 
     return [p.str_list for p in partnumbers if p]

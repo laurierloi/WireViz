@@ -7,30 +7,36 @@
         <tr>
           <td colspan="2"> <b> {{ component.designator }} </b> </td>
           {% block header_extra_col %} {% endblock %}
+          {# Doesn't work with cable components, because they can have a list of bom entries
           {% if component.bom_entry.id %}
           <td> BOM: {{ component.bom_entry.id }} </td>
           {% endif %}
+          #}
         </tr>
       </table>
     </td>
   </tr>
   <!-- Part Number !-->
   {% if component.partnumbers %}
-  <tr>
-    <td>
-      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
-        <tr>
-          {% if component.partnumbers.is_list %}
-          <td> FILLME </td>
-          {% else %}
-          {% for item in component.partnumbers.as_list() %}
-          <td> {{item}} </td>
-          {% endfor %}
-          {% endif %}
-        </tr>
-      </table>
-    </td>
-  </tr>
+      {% if component.partnumbers.is_list %}
+          {% set item = component.partnumbers.keep_only_shared().as_list() %}
+      {% else %}
+          {% set item = component.partnumbers.as_list() %}
+      {% endif %}
+      {% if item %}
+      <tr>
+        <td>
+          <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
+            <tr>
+
+              {% for pn in item %}
+                  <td> {{ pn }} </td>
+              {% endfor %}
+            </tr>
+          </table>
+        </td>
+      </tr>
+      {% endif %}
   {% endif %}
   <!-- Info !-->
   <tr>
@@ -45,17 +51,21 @@
   <!-- Ports !-->
   <tr>
     <td>
-      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
-          {% block port_rows %} {% endblock %}
-      </table>
+      {% block ports %} {% endblock %}
     </td>
   </tr>
   <!-- Image !-->
   {% if component.image %}
   {% set image=component.image %}
-  <tr>
+  <tr >
     <td>
-      {% include "images.html" %}
+      <table border="0" cellborder="1" cellspacing="0" cellpadding="3" bgcolor="#FFFFFF">
+        <tr>
+          <td>
+              {% include "images.html" %}
+          </td>
+        </tr>
+      </table>
     </td>
   </tr>
   {% endif %}
@@ -64,12 +74,12 @@
   {% set additional_components=component.additional_components %}
   <tr>
     <td>
-      {% include "additional_components.html" %}
+        {% include "additional_components.html" %}
     </td>
   </tr>
   {% endif %}
   <!-- Notes !-->
-  {% if component.notes.raw %}
+  {% if component.notes and component.notes.raw %}
   <tr>
     <td>
       <table border="0" cellborder="1" cellpadding="3" cellspacing="0">

@@ -99,7 +99,8 @@ class SingleColor:
 
     @property
     def html_padded(self):
-        return ":".join([self.html] * padding_amount)
+        html = self.html if self.html else "#FFFFFF"
+        return ":".join([html] * padding_amount)
 
     def __len__(self):
         return 1
@@ -204,6 +205,8 @@ class MultiColor:
 
     @property
     def html_padded(self):
+        if len(self.html_padded_list) == 0:
+            return "#FFFFFF"
         return ":".join(self.html_padded_list)
 
 
