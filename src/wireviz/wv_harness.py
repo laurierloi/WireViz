@@ -14,23 +14,17 @@ from wireviz.notes import Notes
 from wireviz.page_options import PageOptions
 from wireviz.wv_bom import BomContent, BomRenderOptions
 from wireviz.wv_dataclasses import (
-    Arrow,
-    ArrowWeight,
     BomCategory,
     Cable,
     Component,
     Connector,
-    MateComponent,
-    MatePin,
     Side,
 )
 from wireviz.wv_graphviz import (
     gv_connector_loops,
-    gv_edge_mate,
     gv_edge_wire,
     gv_node_cable,
     gv_node_connector,
-    parse_arrow_str,
     set_dot_basics,
 )
 from wireviz.wv_output import (
@@ -52,7 +46,6 @@ class Harness:
     def __post_init__(self):
         self.connectors = {}
         self.cables = {}
-        self.mates = []
         self.bom = {}
         self.additional_bom_items = []
 
@@ -71,23 +64,6 @@ class Harness:
     def add_additional_bom_item(self, item: dict) -> None:
         new_item = Component(**item, category=BomCategory.ADDITIONAL)
         self.additional_bom_items.append(new_item)
-
-    def add_mate_pin(self, from_name, from_pin, to_name, to_pin, arrow_str) -> None:
-        from_con = self.connectors[from_name]
-        from_pin_obj = from_con.pin_objects[from_pin]
-        to_con = self.connectors[to_name]
-        to_pin_obj = to_con.pin_objects[to_pin]
-        arrow = Arrow(direction=parse_arrow_str(arrow_str), weight=ArrowWeight.SINGLE)
-
-        self.mates.append(MatePin(from_pin_obj, to_pin_obj, arrow))
-        self.connectors[from_name].activate_pin(
-            from_pin, Side.RIGHT, is_connection=False
-        )
-        self.connectors[to_name].activate_pin(to_pin, Side.LEFT, is_connection=False)
-
-    def add_mate_component(self, from_name, to_name, arrow_str) -> None:
-        arrow = Arrow(direction=parse_arrow_str(arrow_str), weight=ArrowWeight.SINGLE)
-        self.mates.append(MateComponent(from_name, to_name, arrow))
 
     def populate_bom(self):
         # helper lists
@@ -382,12 +358,6 @@ class Harness:
                     dot.edge(l1, l2)
                 if not (r1, r2) == (None, None):
                     dot.edge(r1, r2)
-
-        for mate in self.mates:
-            color, dir, code_from, code_to = gv_edge_mate(mate)
-
-            dot.attr("edge", color=color, style="dashed", dir=dir)
-            dot.edge(code_from, code_to)
 
         return dot
 

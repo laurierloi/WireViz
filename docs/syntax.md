@@ -43,11 +43,11 @@ options:  # dictionary of common attributes for the whole harness
 ```yaml
 <str>   :  # unique connector designator/name
   # general information about a connector (all optional)
-  type: <str>   
-  subtype: <str>   
+  type: <str>
+  subtype: <str>
   color: <color>  # see below
   image: <image>  # see below
-  notes: <str>   
+  notes: <str>
 
   # product information (all optional)
   ignore_in_bom: <bool>  # if set to true the connector is not added to the BOM
@@ -94,7 +94,7 @@ options:  # dictionary of common attributes for the whole harness
                         # generates one BOM item for every wire in the bundle
                         # instead of a single item for the entire cable;
                         # renders with a dashed outline
-  type: <str>   
+  type: <str>
   gauge: <int/float/str>  # allowed formats:
                           # <int/float> mm2  is understood
                           # <int> AWG        is understood
@@ -114,7 +114,7 @@ options:  # dictionary of common attributes for the whole harness
                         # A shield can be accessed by using 's' as the wire ID
   color: <color>  # see below
   image: <image>  # see below
-  notes: <str>   
+  notes: <str>
 
   # product information (all optional)
   ignore_in_bom: <bool>  # if set to true the cable or wires are not added to the BOM
@@ -156,7 +156,6 @@ connections:
   -                # Each list entry is a connection set
     - <component>    # Each connection set is itself a list of items
     - <component>    # Items must alternatingly belong to the connectors and cables sections
-                     # Arrows may be used instead of cables
     -...
 
   - # example (single connection)
@@ -173,19 +172,6 @@ connections:
     - [<connector>, ..., <connector>]     # specify multiple simple connectors to attach in parallel
                                           # these may be unique, auto-generated, or a mix of both
 
-  - # example (arrows between pins)
-    - <connector>: [<pin>, ..., <pin>]
-    - [<arrow>, ..., <arrow>]             # draw arrow linking pins of both connectors
-                                          # use single line arrows (--, <--, <-->, -->)
-    - <connector>: [<pin>, ..., <pin>]
-
-  - # example (arrows between connectors)
-    - <connector>                  
-    - <arrow>                               # draw arrow linking the connectors themselves
-                                            # use double line arrow (==, <==, <==>, ==>)
-    - <connector>
-
-  ...    
 ```
 
 - Each connection set is a list of components.
@@ -195,7 +181,6 @@ connections:
 - When a connection set defines multiple parallel connections, the number of specified `<pin>`s and `<wire>`s for each component in the set must match. When specifying only one designator, one is auto-generated for each connection of the set.
 - `<pin>` may reference a pin's unique ID (as per the connector's `pins` attribute, auto-numbered from 1 by default) or its label (as per `pinlabels`).
 - `<wire>` may reference a wire's number within a cable/bundle, its label (as per `wirelabels`) or, if unambiguous, its color.
-- For `<arrow>`, see below.
 
 ### Single connections
 
@@ -246,33 +231,6 @@ For connectors with `autogenerate: true`, a new instance, with auto-generated de
   - `<int>-<int>` auto-expands to a range.
   - `<str>` to refer to a wire's label or color, if unambiguous.
 
-### Arrows
-
-Arrows may be used in place of wires to join two connectors. This can represent the mating of matching connectors.
-
-To represent joining individual pins between two connectors, a list of single arrows is used:
-```yaml
-connections:
-  -
-    - <connector>: [<pin>,...,<pin>]
-    - [<arrow>, ..., <arrow>]         # --, <--, <--> or -->
-    - <connector>: [<pin>,...,<pin>]
-```
-
-To represent mating of two connectors as a whole, one double arrow is used:
-```yaml
-connections:
-  -
-    - <connector>  # using connector designator only
-    - <arrow>      # ==, <==, <==> or ==>
-    - <connector>
-  -
-    - ...
-    - <connector>: [<pin>, ...]  # designator and pinlist (pinlist is ignored)
-                                 # useful when combining arrows and wires
-    - <arrow>                    # ==, <==, <==> or ==>
-    - <connector>: [<pin>, ...]
-    - ...
 ```
 
 ### Autogeneration of items
@@ -307,7 +265,7 @@ connections:
     - W.W1: [1,2,...]  # Use template W, generate instance with designator W1
     - Y.Y2: [1,2,...]  # generate more instances from the same templates
     - W.W2: [1,2,...]
-    - Y.Y3: [1,2,...]  
+    - Y.Y3: [1,2,...]
 
   -  # autogeneration of unnamed instances
     - Y3:   [1,2,...]  # reuse existing instance Y3
@@ -397,9 +355,9 @@ Parts can be added to a connector or cable in the section `<additional-component
                   # total_length     sum of lengths of each wire in the bundle
   unit: <str>
   pn: <str>            # [internal] part number
-  manufacturer: <str>  # manufacturer name  
+  manufacturer: <str>  # manufacturer name
   mpn: <str>           # manufacturer part number
-  supplier: <str>      # supplier name  
+  supplier: <str>      # supplier name
   spn: <str>           # supplier part number
   bgcolor: <color>     # Background color of entry in diagram component box
 ```
@@ -408,15 +366,15 @@ Alternatively items can be added to just the BOM by putting them in the section 
 
 ```yaml
 -
-  description: <str>              
+  description: <str>
   # all the following are optional:
   qty: <int/float>  # qty to add to the bom (defaults to 1)
-  unit: <str>   
+  unit: <str>
   designators: <List>
   pn: <str>            # [internal] part number
-  manufacturer: <str>  # manufacturer name  
+  manufacturer: <str>  # manufacturer name
   mpn: <str>           # manufacturer part number
-  supplier: <str>      # supplier name  
+  supplier: <str>      # supplier name
   spn: <str>           # supplier part number
 ```
 
