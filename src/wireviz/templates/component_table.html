@@ -17,23 +17,27 @@
     </td>
   </tr>
   <!-- Part Number !-->
-  {# Doesn't work properly.. partnumbers are ntoa always defined =(
   {% if component.partnumbers %}
-  <tr>
-    <td>
-      <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
-        <tr>
-          {% if component.partnumbers.is_list %}
-          {% for item in component.partnumbers.as_list() %}
-          <td> {{item}} </td>
-          {% endfor %}
-          {% endif %}
-        </tr>
-      </table>
-    </td>
-  </tr>
+      {% if component.partnumbers.is_list %}
+          {% set item = component.partnumbers.keep_only_shared().as_list() %}
+      {% else %}
+          {% set item = component.partnumbers.as_list() %}
+      {% endif %}
+      {% if item %}
+      <tr>
+        <td>
+          <table border="0" cellborder="1" cellpadding="3" cellspacing="0">
+            <tr>
+
+              {% for pn in item %}
+                  <td> {{ pn }} </td>
+              {% endfor %}
+            </tr>
+          </table>
+        </td>
+      </tr>
+      {% endif %}
   {% endif %}
-  #}
   <!-- Info !-->
   <tr>
     <td>

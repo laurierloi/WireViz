@@ -31,20 +31,6 @@ def gv_node_connector(connector: Connector) -> Table:
 
 
 def gv_node_cable(cable: Cable) -> Table:
-    # TODO: add support for row below the wire
-    #    # row below the wire
-    #    if wire.partnumbers:
-    #        cells_below = wire.partnumbers.as_list(parent_partnumbers=cable.partnumbers)
-    #        if cells_below is not None and len(cells_below) > 0:
-    #            table_below = (
-    #                Table(
-    #                    Tr([Td(cell) for cell in cells_below]),
-    #                    border=0,
-    #                    cellborder=0,
-    #                    cellspacing=0,
-    #                ),
-    #            )
-    #            rows.append(Tr(Td(table_below, colspan=len(cells_above))))
     # TODO: support multicolor cables
     # TODO: extend cable style support
     params = {"component": cable}

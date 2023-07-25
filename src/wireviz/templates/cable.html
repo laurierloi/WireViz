@@ -55,10 +55,24 @@
           </td>
 	  </tr>
 	  <!-- Cable Bottom -->
-       <!--
-	  <tr>
-	  </tr>
-      -->
+      {% if wire.partnumbers and component.partnumbers.is_list %}
+      {% set partnumbers = wire.partnumbers.as_list(parent_partnumbers=component.partnumbers) %}
+      {% if partnumbers %}
+      <tr>
+          <td align="left">
+          <table  border="0" cellborder="0" cellspacing="0">
+              <tr>
+                 {% for partnumber in partnumbers[0] %}
+                 {% if partnumber %}
+                 <td align="right"> {{ partnumber }} </td>
+                 {% endif %}
+                 {% endfor %}
+              </tr>
+          </table>
+          </td>
+      </tr>
+      {% endif %}
+      {% endif %}
 	{% endfor %}
     <tr>
      <td>&nbsp;</td>
