@@ -161,10 +161,11 @@ def set_dot_basics(dot, options):
     dot.attr(
         "graph",
         rankdir="LR",
-        ranksep="2",
+        ranksep="3", # TODO: make conditional on the number of components/connections
         bgcolor=options.bgcolor.html,
         nodesep="0.33",
         fontname=options.fontname,
+        splines="polyline",
     )
     dot.attr(
         "node",
