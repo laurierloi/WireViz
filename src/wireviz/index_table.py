@@ -82,7 +82,7 @@ class IndexTable:
             quantity = qty_multipliers[row] if qty_multipliers is not None else 1
             rows.append(
                 IndexTableRow(
-                    sheet=index + 2,
+                    sheet=index + 1,
                     page=row,
                     quantity=quantity,
                     notes=metadata.pages_notes.get(row, ""),
