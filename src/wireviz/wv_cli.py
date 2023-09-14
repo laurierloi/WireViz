@@ -174,19 +174,15 @@ def cli(
     extra_metadata["use_qty_multipliers"] = use_qty_multipliers
     extra_metadata["multiplier_file_name"] = multiplier_file_name
 
-    # Only generate the global pdf if there's multiple files
-    create_titlepage = False
-    if extra_metadata["sheet_total"] > 1:
-        create_titlepage = True
-        extra_metadata["titlepage"] = Path("titlepage")
-        extra_metadata["output_names"].insert(0, "titlepage")
-        extra_metadata["sheet_current"] += 1
-        extra_metadata["sheet_total"] += 1
+    # Always generate a titlepage
+    create_titlepage = True
+    extra_metadata["titlepage"] = Path("titlepage")
+    extra_metadata["output_names"].insert(0, "titlepage")
+    extra_metadata["sheet_current"] += 1
+    extra_metadata["sheet_total"] += 1
 
-        if "pdf" in harness_output_formats:
-            harness_output_formats.remove("pdf")
-    else:
-        extra_metadata["titlepage"] = None
+    if "pdf" in harness_output_formats:
+        harness_output_formats.remove("pdf")
 
     # run WireVIz on each input file
     for _file in files:
