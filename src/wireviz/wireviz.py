@@ -218,7 +218,7 @@ def parse(
         # check that all entries are the same length
         if len(set(connectioncount)) > 1:
             raise Exception(
-                "All items in connection set must reference the same number of connections"
+                f"All items in connection set must reference the same number of connections, not the case for {connection_set}"
             )
         # all entries are the same length, connection count is set
         connectioncount = connectioncount[0]
