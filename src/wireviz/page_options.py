@@ -21,7 +21,7 @@ class PageFormatOptions:
 
 
 @dataclass
-class DiagramColorOpions:
+class DiagramColorOptions:
     bgcolor: SingleColor = "WH"  # will be converted to SingleColor in __post_init__
     bgcolor_node: SingleColor = "WH"
     bgcolor_connector: SingleColor = None
@@ -47,11 +47,18 @@ class ComponentDimensions:
     titleblock_row_height: float = 4.25
     index_table_row_height: float = 4.25
 
+    def __post_init__(self):
+        self.bom_rows = int(self.bom_rows)
+        self.titleblock_rows = int(self.titleblock_rows)
+        self.bom_row_height = float(self.bom_row_height)
+        self.titleblock_row_height = float(self.titleblock_row_height)
+        self.index_table_row_height = float(self.index_table_row_height)
+
 
 # TODO: custom options for TitlePage, BOMPage, NotesPage, HarnessPage?
 # TODO: have options tree instead of unwrapping?
 @dataclass
-class PageOptions(ComponentDimensions, PageFormatOptions, DiagramColorOpions):
+class PageOptions(ComponentDimensions, PageFormatOptions, DiagramColorOptions):
     fontname: PlainText = "arial"
     mini_bom_mode: bool = True
     template_separator: str = "."
@@ -61,9 +68,9 @@ class PageOptions(ComponentDimensions, PageFormatOptions, DiagramColorOpions):
     _template_paths: [List] = field(default_factory=list)
     _image_paths: [List] = field(default_factory=list)
 
-    def __post_init(self):
+    def __post_init__(self):
         DiagramColorOptions.__post_init__(self)
-        PageFormatOptions.__post_init__(self)
+        ComponentDimensions.__post_init__(self)
 
 
 def get_page_options(parsed_data, page_name: str):
