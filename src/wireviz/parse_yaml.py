@@ -43,7 +43,12 @@ def merge_content(content: List[Dict[str, Any]]) -> Dict[str, Any]:
 
 
 def parse_merge_yaml(_yamls: List[str]) -> Dict[str, Any]:
-    return merge_content([yaml.safe_load(_yaml) for _yaml in _yamls])
+    loader = yaml.loader.SafeLoader
+    loader.construct_yaml_int = loader.construct_yaml_str
+    # Keep all int as string, because component number tend to be int and can be mangled by the cast
+    loader.yaml_constructors['tag:yaml.org,2002:int'] = loader.yaml_constructors['tag:yaml.org,2002:str']
+
+    return merge_content([yaml.load(_yaml, Loader=loader) for _yaml in _yamls])
 
 
 def parse_merge_files(files: List[Path]) -> Dict[str, Any]:
