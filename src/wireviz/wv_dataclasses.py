@@ -133,6 +133,12 @@ class Component:
         self.type = MultilineHypertext.to(self.type)
         self.subtype = MultilineHypertext.to(self.subtype)
 
+        if self.qty_multiplier:
+            try:
+                self.qty_multiplier = int(self.qty_multiplier)
+            except:
+                pass
+
         if isinstance(self.pn, list):
             raise RuntimeError(f"PN ({self.pn}) should not be a list")
 
@@ -267,6 +273,9 @@ class Connector(GraphicalComponent):
         self._ports_left_set = False
         self._ports_right_set = False
 
+        if self.pincount is not None:
+            self.pincount = int(self.pincount)
+
         if self.style == "simple":
             if self.pincount and self.pincount > 1:
                 raise Exception(
@@ -274,7 +283,7 @@ class Connector(GraphicalComponent):
                 )
             self.pincount = 1
 
-        if not self.pincount:
+        if self.pincount is None:
             self.pincount = max(
                 len(self.pins), len(self.pinlabels), len(self.pincolors)
             )
@@ -290,6 +299,14 @@ class Connector(GraphicalComponent):
 
         if len(self.pins) != len(set(self.pins)):
             raise Exception("Pins are not unique")
+
+        # convert all pins which can be to int
+        def to_int_pin(pin):
+            try:
+                return int(pin)
+            except ValueError:
+                return pin
+        self.pins = [to_int_pin(p) for p in self.pins]
 
         # all checks have passed
         pin_tuples = zip_longest(
@@ -315,6 +332,7 @@ class Connector(GraphicalComponent):
             # hide pincount for simple (1 pin) connectors by default
             self.show_pincount = self.style != "simple"
 
+        self.loops = [[to_int_pin(p) for p in loop] for loop in self.loops]
         for loop in self.loops:
             # TODO: check that pins to connect actually exist
             # TODO: allow using pin labels in addition to pin numbers,
@@ -688,6 +706,7 @@ class Cable(WireClass):
         self.amount = self.length  # for BOM
 
         if self.wirecount:  # number of wires explicitly defined
+            self.wirecount = int(self.wirecount)
             if self.colors:  # use custom color palette (partly or looped if needed)
                 self.colors = [
                     self.colors[i % len(self.colors)] for i in range(self.wirecount)
