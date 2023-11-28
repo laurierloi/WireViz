@@ -35,6 +35,9 @@ class Image:
 
     def __post_init__(self):
 
+        self.width = int(self.width)
+        self.height = int(self.height)
+
         self.bgcolor = SingleColor(self.bgcolor)
 
         if not self.fixedsize:
