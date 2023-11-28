@@ -217,7 +217,7 @@ def parse(
 
         # check that all entries are the same length
         if len(set(connectioncount)) > 1:
-            pretty_sets = [f'"{k}": {v}' for s in connection_set for k, v in s.items()]
+            pretty_sets = [f'length {len(v)}: "{k}": {v}' for s in connection_set for k, v in s.items()]
             prettyer_sets = '\n\t' + '\n\t'.join(pretty_sets)
             raise Exception(
                 f"All items in connection set must reference the same number of connections\nIt is not the case for:{prettyer_sets}"
