@@ -52,6 +52,12 @@
     white-space: normal;
   }
 
+  #titleblock .gitstatus {
+    text-align: center;
+    font-style: italic;
+    width: 4mm;
+  }
+
   #titleblock .partno {
     font-size: 4mm;
     text-align: center;
@@ -174,7 +180,7 @@
       {{ revision(7) }}
       <!-- AUTHOR INFO + LOGO   Column 5 to 7 --!>
       <!-- HARNESS INFO         Column 8 to 10 --!>
-      <td class="partno" colspan="3" rowspan="3"> {{ metadata.pn }}</td>
+      <td class="partno" colspan="3" rowspan="2"> {{ metadata.pn }}</td>
       <td class="revision" colspan="1" rowspan="2"> REV {{ metadata.revision }}</td>
     </tr>
 
@@ -190,6 +196,7 @@
       {{ revision(9) }}
       <!-- AUTHOR INFO + LOGO   Column 5 to 7 --!>
       <!-- HARNESS INFO         Column 8 to 10 --!>
+      <td class="gitstatus" colspan="3" rowspan="1"> {{ metadata.git_status }}</td>
       <td class="sheetno" colspan="1">Sheet {{ metadata.sheet_current }} of {{ metadata.sheet_total }}</td>
     </tr>
 
