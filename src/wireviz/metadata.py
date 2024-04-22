@@ -140,6 +140,7 @@ class Metadata(PagesMetadata, OutputMetadata, CompanyInfo, SheetMetadata, Docume
     authors: Dict[str, AuthorSignature] = field(default_factory=dict)
     revisions: Dict[str, RevisionSignature] = field(default_factory=list)
     template: PageTemplateConfig = PageTemplateConfig()
+    git_status: str = ''
     logo: str = None
 
     def __post_init__(self):
