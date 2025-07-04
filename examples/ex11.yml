@@ -1,0 +1,52 @@
+# Example 11: loopback wires
+connectors:
+  X1:
+    type: Stewart Connector SS-37000-002
+    subtype: male
+    pinlabels: [DA+,DA-,LB4,LB3,DD+,DD-,LB1, LB2] # pincount is implicit in pinout
+    loops:
+      - first: 1
+        second: 2
+        side: LEFT
+      - first: LB3
+        second: LB4
+        side: LEFT
+  X2:
+    type: Stewart Connector SS-37000-002
+    subtype: male
+    pinlabels: [LB5,LB6,DA+,DD+,DD-,DA-,LB7,LB8]
+    loops:
+      - first: 1
+        second: 2
+        side: RIGHT
+        show_label: false
+      - first: LB7
+        second: LB8
+        side: LEFT
+
+cables:
+  W1:
+    color_code: T568A # auto-color wires based on a standard
+    wirecount: 4 # need to specify number of wires explicitly when using a color code
+    gauge: 24 AWG # also accepts AWG as unit
+    length: 1 # length in m
+    shield: false
+    type: CAT5e
+
+      #WLB1:
+      #  wirecount: 1
+
+      #WLB2:
+      #  wirecount: 1
+
+
+connections:
+  - - X1: [1,2,5,6]
+    - W1: [1-4]
+    - X2: [3,6,4,5] # crossover
+      #- - X1: [7]
+      #  - WLB1: [1]
+      #  - X1: [8]
+      #- - X2: [8]
+      #  - WLB2: [1]
+      #  - X2: [7]

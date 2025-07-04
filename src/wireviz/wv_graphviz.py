@@ -5,7 +5,7 @@ from typing import Any, List, Optional, Union
 
 from wireviz import APP_NAME, APP_URL, __version__
 from wireviz.wv_colors import MultiColor, SingleColor
-from wireviz.wv_dataclasses import Cable, Component, Connector, ShieldClass, WireClass
+from wireviz.wv_dataclasses import Cable, Component, Connector, ShieldClass, WireClass, Side
 from wireviz.wv_html import Img, Table, Td, Tr
 from wireviz.wv_templates import get_template
 from wireviz.wv_utils import html_line_breaks, remove_links
@@ -45,9 +45,18 @@ def gv_connector_loops(connector: Connector) -> List:
     else:
         raise Exception("No side for loops")
     for loop in connector.loops:
-        head = f"{connector.designator}:p{loop[0]}{loop_side}:{loop_dir}"
-        tail = f"{connector.designator}:p{loop[1]}{loop_side}:{loop_dir}"
-        loop_edges.append((head, tail))
+        this_loop_side = loop_side
+        this_loop_dir = loop_dir
+        if loop.side == Side.RIGHT:
+            this_loop_side = 'r'
+            this_loop_dir = 'e'
+        elif loop.side == Side.LEFT:
+            this_loop_side = 'l'
+            this_loop_dir = 'w'
+
+        head = f"{connector.designator}:p{loop.first.id}{this_loop_side}:{this_loop_dir}"
+        tail = f"{connector.designator}:p{loop.second.id}{this_loop_side}:{this_loop_dir}"
+        loop_edges.append((loop, head, tail))
     return loop_edges
 
 

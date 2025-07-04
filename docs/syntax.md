@@ -81,8 +81,14 @@ options:  # dictionary of common attributes for the whole harness
   hide_disconnected_pins: <bool>  # defaults to false
 
   # loops
-  loops: <List>  # every list item is itself a list of exactly two pins
+  loops: <List[loop]>  # every list item is a loop object representing two pins
                  # on the connector that are to be shorted
+	  loop:
+		- <first>: the first <pin> of the loop
+		- <second>: the second <pin> of the loop
+		- <side>: either "LEFT" or "RIGHT"
+		- show_label: <bool> defaults to true, will show the loop label
+
 ```
 
 ## Cable attributes

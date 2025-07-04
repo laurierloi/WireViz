@@ -210,12 +210,32 @@ class GraphicalComponent(Component):  # abstract class
 
         self.designator = remove_links(self.designator)
 
+@dataclass
+class Loop():
+    first: PinClass = None
+    second: PinClass = None
+    side: Side = None
+    show_label: bool = True
+
+    def __post_init__(self):
+        if self.side.upper() == 'LEFT':
+            self.side = Side.LEFT
+        elif self.side.upper() == 'RIGHT':
+            self.side = Side.RIGHT
+
+    @property
+    def label(self):
+        if self.show_label:
+            return f'{self.first}<->{self.second}'
+        else:
+            return ''
+
 
 @dataclass
 class Connector(GraphicalComponent):
     # connector-specific properties
     style: Optional[str] = None
-    loops: List[List[Pin]] = field(default_factory=list)
+    loops: List[Loop] = field(default_factory=list)
     # pin information in particular
     pincount: Optional[int] = None
     pins: List[Pin] = field(default_factory=list)  # legacy
@@ -308,6 +328,7 @@ class Connector(GraphicalComponent):
                 return pin
         self.pins = [to_int_pin(p) for p in self.pins]
 
+
         # all checks have passed
         pin_tuples = zip_longest(
             self.pins,
@@ -332,17 +353,41 @@ class Connector(GraphicalComponent):
             # hide pincount for simple (1 pin) connectors by default
             self.show_pincount = self.style != "simple"
 
-        self.loops = [[to_int_pin(p) for p in loop] for loop in self.loops]
+        def get_pin_object(value):
+            pin_id = None
+            if value in self.pinlabels:
+                pin_id = self.pins[self.pinlabels.index(value)]
+            else:
+                err = f'{value} not found in {self.pinlabels}'
+                try:
+                    value = int(value)
+                except ValueError as exc:
+                    raise ValueError(f'{err} and is not an int')
+
+                if value in self.pins:
+                    pin_id = value
+
+            if pin_id is not None:
+                return self.pin_objects[pin_id]
+
+            raise ValueError(f'{err} and is not one of the pins {self.pins}')
+
+        self.loops = [Loop(
+            first=get_pin_object(loop['first']),
+            second=get_pin_object(loop['second']),
+            side=loop.get('side'),
+            show_label=loop.get('show_label', True),
+        ) for loop in self.loops]
+
+
+        #self.loops = [[to_int_pin(p) for p in loop] for loop in self.loops]
         for loop in self.loops:
             # TODO: check that pins to connect actually exist
             # TODO: allow using pin labels in addition to pin numbers,
             #       just like when defining regular connections
             # TODO: include properties of wire used to create the loop
-            if len(loop) != 2:
-                raise Exception("Loops must be between exactly two pins!")
-            # side=None, determine side to show loops during rendering
-            self.activate_pin(loop[0], side=None, is_connection=True)
-            self.activate_pin(loop[1], side=None, is_connection=True)
+            self.activate_pin(loop.first.id, side=loop.side, is_connection=True)
+            self.activate_pin(loop.second.id, side=loop.side, is_connection=True)
 
     def activate_pin(self, pin_id, side: Side = None, is_connection=True) -> None:
         if is_connection:
