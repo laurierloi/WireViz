@@ -8,21 +8,25 @@ connectors:
       - first: 1
         second: 2
         side: LEFT
+        color: PK
       - first: LB3
         second: LB4
         side: LEFT
   X2:
     type: Stewart Connector SS-37000-002
     subtype: male
-    pinlabels: [LB5,LB6,DA+,DD+,DD-,DA-,LB7,LB8]
+    pins: [3, 4, 5, 6, 1, 2, 7, 8]
+    pinlabels: [DA+, D+, D-, A-, LB5, LB6, LB7, LB8]
     loops:
       - first: 1
         second: 2
         side: RIGHT
         show_label: false
+        color: RD
       - first: LB7
         second: LB8
         side: LEFT
+        color: GN
 
 cables:
   W1:

@@ -80,6 +80,10 @@ class PinClass:
         return ":".join([snip for snip in snippets if snip != ""])
 
     @property
+    def pin(self):
+        return self.index+1
+
+    @property
     def category(self):
         return BomCategory.PIN
 
@@ -216,6 +220,7 @@ class Loop():
     second: PinClass = None
     side: Side = None
     show_label: bool = True
+    color: Optional[MultiColor] = None
 
     def __post_init__(self):
         if self.side.upper() == 'LEFT':
@@ -223,12 +228,17 @@ class Loop():
         elif self.side.upper() == 'RIGHT':
             self.side = Side.RIGHT
 
+        self.color = MultiColor(self.color)
+
     @property
     def label(self):
         if self.show_label:
-            return f'{self.first}<->{self.second}'
+            return f'{self.first}⇿{self.second}'
         else:
             return ''
+
+    def html_color(self):
+        return self.color[0].html
 
 
 @dataclass
@@ -354,38 +364,32 @@ class Connector(GraphicalComponent):
             self.show_pincount = self.style != "simple"
 
         def get_pin_object(value):
-            pin_id = None
-            if value in self.pinlabels:
-                pin_id = self.pins[self.pinlabels.index(value)]
-            else:
-                err = f'{value} not found in {self.pinlabels}'
-                try:
-                    value = int(value)
-                except ValueError as exc:
-                    raise ValueError(f'{err} and is not an int')
+            # is label?
+            pin_match_label = [p for p in self.pin_objects.values() if p.label == value]
+            if pin_match_label:
+                return pin_match_label[0]
+            err = f'{value} not found in {self.pinlabels}'
 
-                if value in self.pins:
-                    pin_id = value
+            try:
+                value = int(value)
+            except ValueError as exc:
+                raise ValueError(f'{err} and is not an int')
 
-            if pin_id is not None:
-                return self.pin_objects[pin_id]
-
-            raise ValueError(f'{err} and is not one of the pins {self.pins}')
+            pin_match_id = [p for p in self.pin_objects.values() if p.id == value]
+            if not pin_match_id:
+                raise ValueError(f'{err} and is not one of the pins {self.pins}')
+            return pin_match_id[0]
 
         self.loops = [Loop(
             first=get_pin_object(loop['first']),
             second=get_pin_object(loop['second']),
             side=loop.get('side'),
             show_label=loop.get('show_label', True),
+            color=loop.get('color'),
         ) for loop in self.loops]
 
 
-        #self.loops = [[to_int_pin(p) for p in loop] for loop in self.loops]
         for loop in self.loops:
-            # TODO: check that pins to connect actually exist
-            # TODO: allow using pin labels in addition to pin numbers,
-            #       just like when defining regular connections
-            # TODO: include properties of wire used to create the loop
             self.activate_pin(loop.first.id, side=loop.side, is_connection=True)
             self.activate_pin(loop.second.id, side=loop.side, is_connection=True)
 

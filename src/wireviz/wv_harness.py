@@ -315,10 +315,9 @@ class Harness:
             )
             # generate edges for connector loops
             if len(connector.loops) > 0:
-                dot.attr("edge", color="#000000")
                 loops = gv_connector_loops(connector)
                 for loop, head, tail in loops:
-                    dot.edge(head, tail, xlabel=loop.label)
+                    dot.edge(head, tail, xlabel=loop.label, color=loop.html_color())
 
         # determine if there are double- or triple-colored wires in the harness;
         # if so, pad single-color wires to make all wires of equal thickness

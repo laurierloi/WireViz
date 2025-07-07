@@ -54,8 +54,8 @@ def gv_connector_loops(connector: Connector) -> List:
             this_loop_side = 'l'
             this_loop_dir = 'w'
 
-        head = f"{connector.designator}:p{loop.first.id}{this_loop_side}:{this_loop_dir}"
-        tail = f"{connector.designator}:p{loop.second.id}{this_loop_side}:{this_loop_dir}"
+        head = f"{connector.designator}:p{loop.first.pin}{this_loop_side}:{this_loop_dir}"
+        tail = f"{connector.designator}:p{loop.second.pin}{this_loop_side}:{this_loop_dir}"
         loop_edges.append((loop, head, tail))
     return loop_edges
 
