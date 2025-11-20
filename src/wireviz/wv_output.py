@@ -158,11 +158,18 @@ def generate_html_output(
                 1,
             )
 
+    match = re.search(r"[0-9]+$", str(filename))
+    if not match:
+        harness_number = metadata.sheet_current + 1
+    else:
+        harness_number = int(match[0])
+
     replacements = {
         "options": options,
         "diagram": svgdata,
         "metadata": metadata,
         "notes": notes,
+        "partno": f'{metadata.pn}-{metadata.revision}-{harness_number}',
     }
 
     # TODO: all rendering should be done within their respective classes
