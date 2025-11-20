@@ -164,12 +164,16 @@ def generate_html_output(
     else:
         harness_number = int(match[0])
 
+    partno = f'{metadata.pn}-{metadata.revision}'
+    if template_name != "titlepage":
+        partno +=  f'-{harness_number}'
+
     replacements = {
         "options": options,
         "diagram": svgdata,
         "metadata": metadata,
         "notes": notes,
-        "partno": f'{metadata.pn}-{metadata.revision}-{harness_number}',
+        "partno": partno,
     }
 
     # TODO: all rendering should be done within their respective classes
